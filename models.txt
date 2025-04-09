@@ -1,0 +1,68 @@
+user-model
+
+full name  - string
+email - strig 
+password  - string
+cart  -  array of ids 
+isadmin -  isboolean 
+contact - number
+picture- string
+
+
+
+
+product-model
+
+name
+image 
+price 
+discount
+bg color
+panelcolor
+text color
+
+notes
+1. file wahi chalegi jo app.js me require hogi aur require wahi file ho skti h jo ki kuch export krrhi ho 
+2. postman pr 3000 h to backend server me bhi 3000 hona chaie tabhi req send hogi
+3. mongoose-connection establish krne ke liye system on krke -- cmd as admin pe mongod then new cmd as admin pe mongosh then terminal pr npx nodemon app.js
+4. from part 4 ..13 min
+
+
+
+
+
+
+
+ROUTES CREATED 
+/ - signup or login
+/users/cart--- cart
+/admin--admin panel
+/owner/products ---show all products
+/owner/admin-----show admin panel to create products
+
+
+
+Here's the extracted text from the video shown in your screenshot:
+
+```text
+1  brown- clinge bag(img 80)
+2  text 774F3D
+3  panel DEBEAE
+4  bgcolor F4D0D2
+
+5  lightblue- backpack (bag 1)
+6  text 48606E
+7  panel D3E4EE
+8  bgcolor F3F8FB
+
+9  khaakibrown-multipurpose(bag 6)
+10 text 5F4A30
+11 panel C5B095
+12 bgcolor DEB08F
+
+13 pink attack(bag4)
+14 text 816264
+15 panel E3C4C6
+16 bgcolor F4E0E1
+
+ 
