@@ -1,65 +1,82 @@
-👜 Scatch — Full-Stack E-Commerce Web App
+# 👜 Scatch — Full-Stack E-Commerce Web App
 
-A production-ready full-stack e-commerce application for shopping bags, built with secure authentication, dynamic product rendering, and session-based cart management.
+> A production-ready full-stack e-commerce application for shopping bags, built with **secure authentication, dynamic product rendering, and session-based cart management.**
 
-📌 Overview
+---
 
-Scatch is a full-stack e-commerce web application that replicates real-world online shopping workflows.
-It focuses on backend robustness, session-based authentication, and server-side rendering using EJS.
+## 📌 Overview
+
+**Scatch** is a **full-stack web application** that replicates real-world online shopping workflows.  
+It focuses on backend robustness, session-based authentication, and server-side rendering using **EJS**.  
 
 Users can register, log in, browse products, view product details, add items to a cart, and maintain session state across pages.
 
-🚀 Features
+---
 
-🔐 Authentication – Secure register/login with express-session
+## 🚀 Features
 
-🛍️ Product Listing – Dynamic shop & product detail pages
+- 🔐 **Authentication** – Secure register/login with `express-session`  
+- 🛍️ **Product Listing** – Dynamic shop and product detail pages  
+- 🛒 **Cart System** – Session-based add/remove cart functionality  
+- 🧭 **Protected Routes** – Auth-aware navigation and redirects  
+- 🌐 **SSR UI** – Server-side rendering with EJS for faster SEO and performance  
 
-🛒 Cart System – Session-based add/remove cart functionality
+---
 
-🧭 Protected Routes – Auth-aware navigation & redirects
+## 🖼️ UI Screenshots
 
-🌐 SSR UI – Server-side rendering with EJS
+### Authentication
+<p align="center">
+  <img src="screenshots/login.png" width="45%" />
+  <img src="screenshots/signupp.png" width="45%" />
+</p>
 
-🖼️ Screenshots
-Authentication
-<p align="center"> <img src="screenshots/login.png" width="45%" /> <img src="screenshots/signupp.png" width="45%" /> </p>
-Shop & Orders
-<p align="center"> <img src="screenshots/shop.png" width="30%" /> <img src="screenshots/arrival.png" width="30%" /> <img src="screenshots/orders.png" width="30%" /> </p>
-Cart
-<p align="center"> <img src="screenshots/cart1.png" width="45%" /> <img src="screenshots/cart2.png" width="45%" /> </p>
-🛠️ Tech Stack
+### Shop & Orders
+<p align="center">
+  <img src="screenshots/shop.png" width="30%" />
+  <img src="screenshots/arrival.png" width="30%" />
+  <img src="screenshots/orders.png" width="30%" />
+</p>
 
-Frontend: EJS, Tailwind CSS
+### Cart
+<p align="center">
+  <img src="screenshots/cart1.png" width="45%" />
+  <img src="screenshots/cart2.png" width="45%" />
+</p>
 
-Backend: Node.js, Express.js
+---
 
-Database: MongoDB Atlas, Mongoose
+## 🛠️ Tech Stack
 
-Auth: Express Sessions
+- **Frontend:** EJS, Tailwind CSS  
+- **Backend:** Node.js, Express.js  
+- **Database:** MongoDB Atlas, Mongoose  
+- **Auth:** Express Sessions  
 
-▶️ Run Locally
-git clone https://github.com/dipanshi8/Scatch.git
+---
+
+## ▶️ Run Locally
+
+```bash
+# Clone repository
+git clone [https://github.com/dipanshi8/Scatch.git](https://github.com/dipanshi8/Scatch.git)
 cd Scatch
+
+# Install dependencies
 npm install
 
-PORT=3000
-MONGO_URI=your_mongodb_atlas_uri
-SESSION_SECRET=your_secret
+# Environment setup
+# Create a .env file and add:
+# PORT=3000
+# MONGO_URI=your_mongodb_atlas_uri
+# SESSION_SECRET=your_secret
 
+# Start the server
 npm start
 
-
-Open:
-
-http://localhost:3000
-
-
-
+Open: http://localhost:3000
 
 👩‍💻 Author
-
-Dipanshi Yadav
-GitHub: https://github.com/dipanshi8
+Dipanshi Yadav - GitHub: https://github.com/dipanshi8
 
 LinkedIn: https://www.linkedin.com/in/dipanshi-yadav-00081b
