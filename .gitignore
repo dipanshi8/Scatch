@@ -52,11 +52,6 @@ public/images/*.gif
 public/images/*.webp
 
 # Screenshots
-screenshots/
-*.png
-*.jpg
-*.jpeg
-
 # Temporary files
 *.tmp
 *.temp

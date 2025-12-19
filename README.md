@@ -1,6 +1,6 @@
 # 👜 Scatch — Full-Stack E-Commerce Web App
 
-> A production-ready full-stack e-commerce application for shopping bags, built with **secure authentication, dynamic product rendering, and session-based cart management.**
+> A full-stack e-commerce application for shopping bags, built with **secure authentication, dynamic product rendering, and session-based cart management.**
 
 ---
 
