@@ -5,7 +5,11 @@ require('dotenv').config();
 
 async function reseedProducts() {
   try {
-    const mongoURI = process.env.MONGO_URI || 'mongodb+srv://yaduvanshidips25_db_user:baN8ufhQqU0qGmGs@trackify.of744pl.mongodb.net/Scatchh?retryWrites=true&w=majority&appName=Trackify';
+    const mongoURI = process.env.MONGO_URI;
+    if (!mongoURI) {
+      console.error('❌ MONGO_URI not found in environment variables!');
+      process.exit(1);
+    }
     
     await mongoose.connect(mongoURI);
     console.log('✅ Connected to MongoDB');

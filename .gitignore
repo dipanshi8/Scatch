@@ -1,2 +1,78 @@
-node_modules
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment variables
 .env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Large media files (keep structure, ignore content)
+images/*.jpg
+images/*.png
+images/*.jpeg
+images/*.gif
+images/*.webp
+public/images/*.jpg
+public/images/*.png
+public/images/*.jpeg
+public/images/*.gif
+public/images/*.webp
+
+# Screenshots
+screenshots/
+*.png
+*.jpg
+*.jpeg
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Misc
+*.pem
+*.key
+config/keys.js
+config/development.json
