@@ -1,30 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title><%= typeof pageTitle !== 'undefined' ? pageTitle + ' - ' : '' %>Scatch - Premium Bag Store</title>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.4.19/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
 </head>
 
-<body class="font-['helvetica_now_display']">
-    <nav class="w-full flex justify-between px-5 py-3">
-        <h3 class="text-xl">Scatch</h3>
-        <% var loggedin= typeof loggedin!=="undefined" ? loggedin: true%>
-        <% if (loggedin){%>
-            <div class="flex gap-5">
-                <a href="">Shop</a>
-                <a href="/cart">Cart</a>
-                <a href="/account">My Account</a>
-                <a href="">Logout</a>
-                <a class="text-red-600" href="/users/logout">Logout</a>
-                
-                
-    
-            </div>
-
-        <% }%>
-        
-    </nav>
+<body class="min-h-screen bg-base-100">
+    <%- include('./navbar-premium') %>

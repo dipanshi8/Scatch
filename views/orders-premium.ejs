@@ -1,0 +1,100 @@
+<%- include('./partials/header') %>
+
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8">My Orders</h1>
+    
+    <% if (orders && orders.length > 0) { %>
+        <div class="space-y-6">
+            <% orders.forEach(function(order) { %>
+                <div class="card bg-base-100 shadow-lg">
+                    <div class="card-body">
+                        <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <h3 class="text-xl font-semibold">
+                                        Order #<%= order.orderNumber || order._id.toString().substring(0, 8).toUpperCase() %>
+                                    </h3>
+                                    <span class="badge badge-<%= 
+                                        order.status === 'Delivered' ? 'success' :
+                                        order.status === 'Shipped' ? 'info' :
+                                        order.status === 'Cancelled' ? 'error' :
+                                        'warning'
+                                    %>">
+                                        <%= order.status %>
+                                    </span>
+                                </div>
+                                <p class="text-sm text-base-content/70 mb-2">
+                                    Placed on <%= new Date(order.orderDate).toLocaleDateString('en-IN', { 
+                                        year: 'numeric', 
+                                        month: 'long', 
+                                        day: 'numeric' 
+                                    }) %>
+                                </p>
+                                <p class="text-lg font-bold text-primary">
+                                    ₹<%= order.totalAmount %>
+                                </p>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <a href="/order/<%= order._id %>" class="btn btn-outline btn-sm">
+                                    <i class="ri-eye-line"></i> View Details
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Order Items Preview -->
+                        <div class="divider my-2"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <% const itemsToShow = order.products ? order.products.slice(0, 3) : order.items.slice(0, 3); %>
+                            <% itemsToShow.forEach(function(item) { %>
+                                <div class="flex gap-3">
+                                    <% 
+                                    const product = item.product;
+                                    // Get image URL - prioritize images array, fallback to image field
+                                    let imageUrl = '';
+                                    if (product.images && product.images.length > 0) {
+                                        const primaryImage = product.images.find(img => img.isPrimary) || product.images[0];
+                                        imageUrl = primaryImage ? primaryImage.url : '';
+                                    }
+                                    if (!imageUrl && product.image) {
+                                        imageUrl = product.image;
+                                    }
+                                    // Ensure image path starts with / if it's a local path
+                                    if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('/') && !imageUrl.startsWith('data:')) {
+                                        imageUrl = '/' + imageUrl;
+                                    }
+                                    %>
+                                    <img src="<%= imageUrl %>" alt="<%= product.name %>" 
+                                        class="w-16 h-16 object-cover rounded"
+                                        onerror="this.src='/images/bag-hanging-from-furniture-item-indoors.jpg'" />
+                                    <div class="flex-1">
+                                        <p class="font-semibold text-sm line-clamp-1"><%= product.name %></p>
+                                        <p class="text-xs text-base-content/70">Qty: <%= item.quantity %></p>
+                                        <p class="text-sm font-semibold">₹<%= item.subtotal || ((item.price - (item.discount || 0)) * item.quantity) %></p>
+                                    </div>
+                                </div>
+                            <% }); %>
+                            <% if ((order.products ? order.products.length : order.items.length) > 3) { %>
+                                <div class="text-sm text-base-content/70">
+                                    +<%= (order.products ? order.products.length : order.items.length) - 3 %> more items
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } else { %>
+        <div class="text-center py-16">
+            <i class="ri-shopping-bag-3-line text-6xl text-base-content/30 mb-4"></i>
+            <h2 class="text-2xl font-bold mb-4">No orders yet</h2>
+            <p class="text-base-content/70 mb-6">Start shopping to place your first order!</p>
+            <a href="/shop" class="btn btn-primary btn-lg">
+                <i class="ri-store-2-line"></i> Go to Shop
+            </a>
+        </div>
+    <% } %>
+</div>
+
+<%- include('./partials/footer') %>
+

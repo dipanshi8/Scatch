@@ -1,0 +1,132 @@
+<%- include('./partials/header') %>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-4xl font-bold">Admin Dashboard</h1>
+        <a href="/owners/logout" class="btn btn-error btn-outline">
+            <i class="ri-logout-box-line"></i> Logout
+        </a>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="stat bg-base-200 rounded-lg shadow">
+            <div class="stat-figure text-primary">
+                <i class="ri-shopping-bag-3-line text-4xl"></i>
+            </div>
+            <div class="stat-title">Total Products</div>
+            <div class="stat-value text-primary"><%= productCount %></div>
+            <div class="stat-desc">
+                <a href="/owners/admin/products" class="link link-primary">Manage Products</a>
+            </div>
+        </div>
+        
+        <div class="stat bg-base-200 rounded-lg shadow">
+            <div class="stat-figure text-secondary">
+                <i class="ri-file-list-3-line text-4xl"></i>
+            </div>
+            <div class="stat-title">Total Orders</div>
+            <div class="stat-value text-secondary"><%= orderCount %></div>
+            <div class="stat-desc">
+                <a href="/owners/admin/orders" class="link link-secondary">View All Orders</a>
+            </div>
+        </div>
+        
+        <div class="stat bg-base-200 rounded-lg shadow">
+            <div class="stat-figure text-warning">
+                <i class="ri-time-line text-4xl"></i>
+            </div>
+            <div class="stat-title">Pending Orders</div>
+            <div class="stat-value text-warning"><%= pendingOrders %></div>
+            <div class="stat-desc">Requires attention</div>
+        </div>
+        
+        <div class="stat bg-base-200 rounded-lg shadow">
+            <div class="stat-figure text-success">
+                <i class="ri-money-rupee-circle-line text-4xl"></i>
+            </div>
+            <div class="stat-title">Total Sales</div>
+            <div class="stat-value text-success">₹<%= totalSales.toLocaleString('en-IN') %></div>
+            <div class="stat-desc">All time revenue</div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="card bg-base-100 shadow-lg mb-8">
+        <div class="card-body">
+            <h2 class="card-title text-2xl mb-4">Quick Actions</h2>
+            <div class="flex flex-wrap gap-3">
+                <a href="/owners/admin/products/create" class="btn btn-primary">
+                    <i class="ri-add-line"></i> Add New Product
+                </a>
+                <a href="/owners/admin/products" class="btn btn-outline">
+                    <i class="ri-shopping-bag-3-line"></i> Manage Products
+                </a>
+                <a href="/owners/admin/orders" class="btn btn-outline">
+                    <i class="ri-file-list-3-line"></i> View Orders
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Orders -->
+    <div class="card bg-base-100 shadow-lg">
+        <div class="card-body">
+            <h2 class="card-title text-2xl mb-4">Recent Orders</h2>
+            <% if (recentOrders && recentOrders.length > 0) { %>
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% recentOrders.forEach(function(order) { %>
+                                <tr>
+                                    <td>
+                                        <span class="font-mono text-sm">
+                                            #<%= order._id.toString().substring(0, 8).toUpperCase() %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <%= order.userId ? order.userId.fullname : 'N/A' %>
+                                    </td>
+                                    <td class="font-semibold">₹<%= order.totalAmount %></td>
+                                    <td>
+                                        <span class="badge badge-<%= 
+                                            order.status === 'Delivered' ? 'success' :
+                                            order.status === 'Shipped' ? 'info' :
+                                            order.status === 'Cancelled' ? 'error' :
+                                            'warning'
+                                        %>">
+                                            <%= order.status %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <%= new Date(order.orderDate).toLocaleDateString() %>
+                                    </td>
+                                    <td>
+                                        <a href="/order/<%= order._id %>" class="btn btn-sm btn-ghost">
+                                            View
+                                        </a>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            <% } else { %>
+                <p class="text-base-content/70">No orders yet</p>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<%- include('./partials/footer') %>
+

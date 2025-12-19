@@ -1,0 +1,48 @@
+<%- include('./partials/header') %>
+
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold">Admin Dashboard</h1>
+            <a href="/owners/logout" class="text-red-600 hover:text-red-800">Logout</a>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-gray-600 mb-2">Total Products</h3>
+                <p class="text-3xl font-bold text-blue-600"><%= productCount %></p>
+                <a href="/owners/admin/products" class="text-blue-600 hover:text-blue-800 mt-2 inline-block">View All →</a>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-gray-600 mb-2">Total Orders</h3>
+                <p class="text-3xl font-bold text-green-600"><%= orderCount %></p>
+                <a href="/owners/admin/orders" class="text-green-600 hover:text-green-800 mt-2 inline-block">View All →</a>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-gray-600 mb-2">Pending Orders</h3>
+                <p class="text-3xl font-bold text-yellow-600"><%= pendingOrders %></p>
+                <a href="/owners/admin/orders" class="text-yellow-600 hover:text-yellow-800 mt-2 inline-block">View All →</a>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-2xl font-semibold mb-4">Quick Actions</h2>
+            <div class="flex flex-wrap gap-4">
+                <a href="/owners/admin/products/create" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition">
+                    Add New Product
+                </a>
+                <a href="/owners/admin/products" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition">
+                    Manage Products
+                </a>
+                <a href="/owners/admin/orders" class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition">
+                    View Orders
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('./partials/footer') %>
+

@@ -1,0 +1,75 @@
+<%- include('./partials/header') %>
+
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <a href="/shop" class="text-blue-500 hover:text-blue-700 mb-4 inline-block">← Back to Shop</a>
+        
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="md:flex">
+                <div class="md:w-1/2 p-8 flex items-center justify-center" style="background-color: <%= product.bgcolor || '#ffffff' %>">
+                    <% 
+                    // Get image URL - prioritize images array, fallback to image field
+                    let imageUrl = '';
+                    if (product.images && product.images.length > 0) {
+                        const primaryImage = product.images.find(img => img.isPrimary) || product.images[0];
+                        imageUrl = primaryImage ? primaryImage.url : '';
+                    }
+                    if (!imageUrl && product.image) {
+                        imageUrl = product.image;
+                    }
+                    // Ensure image path starts with / if it's a local path
+                    if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('/') && !imageUrl.startsWith('data:')) {
+                        imageUrl = '/' + imageUrl;
+                    }
+                    %>
+                    <img src="<%= imageUrl %>" alt="<%= product.name %>" 
+                        class="max-w-full h-auto max-h-96 object-contain"
+                        onerror="this.src='/images/bag-hanging-from-furniture-item-indoors.jpg'" />
+                </div>
+                
+                <div class="md:w-1/2 p-8">
+                    <h1 class="text-4xl font-bold mb-4"><%= product.name %></h1>
+                    
+                    <div class="mb-6">
+                        <span class="text-3xl font-bold text-green-600">₹<%= product.price - (product.discount || 0) %></span>
+                        <% if (product.discount > 0) { %>
+                            <span class="text-xl text-gray-500 line-through ml-2">₹<%= product.price %></span>
+                            <span class="text-green-600 ml-2">(<%= Math.round((product.discount / product.price) * 100) %>% off)</span>
+                        <% } %>
+                    </div>
+                    
+                    <% if (product.description) { %>
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-2">Description</h3>
+                            <p class="text-gray-700"><%= product.description %></p>
+                        </div>
+                    <% } %>
+                    
+                    <div class="mb-6">
+                        <p class="text-sm text-gray-600 mb-2">Stock: <span class="font-semibold"><%= product.stock || 'Available' %></span></p>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <% if (typeof user !== 'undefined' && user !== null) { %>
+                            <form action="/addtocart/<%= product._id %>" method="POST" class="flex-1">
+                                <button type="submit" class="w-full bg-blue-500 text-white text-center py-3 px-6 rounded-lg hover:bg-blue-600 transition font-semibold">
+                                    Add to Cart
+                                </button>
+                            </form>
+                        <% } else { %>
+                            <a href="/login" class="flex-1 bg-blue-500 text-white text-center py-3 px-6 rounded-lg hover:bg-blue-600 transition font-semibold">
+                                Login to Add to Cart
+                            </a>
+                        <% } %>
+                        <a href="/shop" class="flex-1 bg-gray-200 text-gray-800 text-center py-3 px-6 rounded-lg hover:bg-gray-300 transition font-semibold">
+                            Continue Shopping
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('./partials/footer') %>
+

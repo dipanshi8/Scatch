@@ -1,0 +1,217 @@
+<%- include('./partials/header') %>
+
+<!-- Flash Messages -->
+<% if(error && error.length>0){ %>
+    <div class="toast toast-top toast-center z-50">
+        <div class="alert alert-error">
+            <span><%= error[0] %></span>
+        </div>
+    </div>
+<% } %>
+
+<% if(success && success.length>0){ %>
+    <div class="toast toast-top toast-center z-50">
+        <div class="alert alert-success">
+            <span><%= success[0] %></span>
+        </div>
+    </div>
+<% } %>
+
+<!-- Hero Section -->
+<div class="hero bg-base-200 py-16 mb-8">
+    <div class="hero-content text-center">
+        <div class="max-w-2xl">
+            <h1 class="text-5xl font-bold mb-4">Premium Bag Collection</h1>
+            <p class="text-lg opacity-70 mb-6">Discover our curated selection of designer bags</p>
+            
+            <!-- Search Bar -->
+            <form action="/shop" method="GET" class="flex gap-2 max-w-md mx-auto">
+                <input type="text" name="search" placeholder="Search products..." 
+                    value="<%= search || '' %>"
+                    class="input input-bordered w-full" />
+                <button type="submit" class="btn btn-primary">
+                    <i class="ri-search-line"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Sidebar Filters -->
+        <aside class="lg:w-64">
+            <div class="card bg-base-100 shadow-lg">
+                <div class="card-body">
+                    <h2 class="card-title text-lg mb-4">Categories</h2>
+                    <ul class="menu menu-vertical gap-2">
+                        <li>
+                            <a href="/shop" class="<%= category === 'all' || !category ? 'active' : '' %>">
+                                All Products
+                                <% if (categoryCounts) { %>
+                                    <span class="badge badge-ghost">
+                                        <%= categoryCounts.reduce((sum, c) => sum + c.count, 0) %>
+                                    </span>
+                                <% } %>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/shop?category=Backpacks" class="<%= category === 'Backpacks' ? 'active' : '' %>">
+                                Backpacks
+                                <% if (categoryCounts) { %>
+                                    <% const bp = categoryCounts.find(c => c._id === 'Backpacks'); %>
+                                    <span class="badge badge-ghost"><%= bp ? bp.count : 0 %></span>
+                                <% } %>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/shop?category=Handbags" class="<%= category === 'Handbags' ? 'active' : '' %>">
+                                Handbags
+                                <% if (categoryCounts) { %>
+                                    <% const hb = categoryCounts.find(c => c._id === 'Handbags'); %>
+                                    <span class="badge badge-ghost"><%= hb ? hb.count : 0 %></span>
+                                <% } %>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/shop?category=Clutches" class="<%= category === 'Clutches' ? 'active' : '' %>">
+                                Clutches
+                                <% if (categoryCounts) { %>
+                                    <% const cl = categoryCounts.find(c => c._id === 'Clutches'); %>
+                                    <span class="badge badge-ghost"><%= cl ? cl.count : 0 %></span>
+                                <% } %>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Products Grid -->
+        <main class="flex-1">
+            <% if (products && products.length > 0) { %>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <% products.forEach(function(product) { %>
+                        <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+                            <figure class="relative">
+                                <% 
+                                // Get image URL - prioritize images array, fallback to image field
+                                let imageUrl = '';
+                                if (product.images && product.images.length > 0) {
+                                    const primaryImage = product.images.find(img => img.isPrimary) || product.images[0];
+                                    imageUrl = primaryImage ? primaryImage.url : '';
+                                }
+                                if (!imageUrl && product.image) {
+                                    imageUrl = product.image;
+                                }
+                                // Ensure image path starts with / if it's a local path
+                                if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('/') && !imageUrl.startsWith('data:')) {
+                                    imageUrl = '/' + imageUrl;
+                                }
+                                %>
+                                <img src="<%= imageUrl %>" alt="<%= product.name %>" 
+                                    class="w-full h-64 object-cover" 
+                                    onerror="this.src='/images/bag-hanging-from-furniture-item-indoors.jpg'" />
+                                <% if (product.discountPrice > 0) { %>
+                                    <div class="badge badge-error absolute top-2 right-2">
+                                        <%= Math.round(((product.price - product.discountPrice) / product.price) * 100) %>% OFF
+                                    </div>
+                                <% } %>
+                                <% if (product.featured) { %>
+                                    <div class="badge badge-primary absolute top-2 left-2">Featured</div>
+                                <% } %>
+                            </figure>
+                            <div class="card-body p-4">
+                                <h2 class="card-title text-base line-clamp-1">
+                                    <%= product.name %>
+                                </h2>
+                                <p class="text-sm text-base-content/70 line-clamp-2 mb-2">
+                                    <%= product.description %>
+                                </p>
+                                <div class="flex items-center gap-2 mb-3">
+                                    <span class="text-xl font-bold text-primary">
+                                        ₹<%= product.discountPrice > 0 ? product.discountPrice : product.price %>
+                                    </span>
+                                    <% if (product.discountPrice > 0) { %>
+                                        <span class="text-sm line-through text-base-content/50">
+                                            ₹<%= product.price %>
+                                        </span>
+                                    <% } %>
+                                </div>
+                                <div class="card-actions justify-between items-center">
+                                    <div class="text-xs text-base-content/60">
+                                        <i class="ri-stack-line"></i> <%= product.stockQuantity %> in stock
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button onclick="openQuickView('<%= product._id %>')" 
+                                            class="btn btn-sm btn-ghost">
+                                            <i class="ri-eye-line"></i>
+                                        </button>
+                                        <% if (typeof user !== 'undefined' && user !== null) { %>
+                                            <form action="/addtocart/<%= product._id %>" method="POST" class="inline">
+                                                <button type="submit" class="btn btn-sm btn-primary">
+                                                    <i class="ri-shopping-cart-line"></i> Add to Cart
+                                                </button>
+                                            </form>
+                                        <% } else { %>
+                                            <a href="/login" class="btn btn-sm btn-primary">
+                                                <i class="ri-shopping-cart-line"></i> Add to Cart
+                                            </a>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="text-center py-16">
+                    <i class="ri-inbox-line text-6xl text-base-content/30 mb-4"></i>
+                    <h3 class="text-2xl font-bold mb-2">No products found</h3>
+                    <p class="text-base-content/70 mb-6">Try adjusting your filters or search terms</p>
+                    <a href="/shop" class="btn btn-primary">View All Products</a>
+                </div>
+            <% } %>
+        </main>
+    </div>
+</div>
+
+<!-- Quick View Modal -->
+<dialog id="quickViewModal" class="modal">
+    <div class="modal-box max-w-4xl">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+        <div id="quickViewContent">
+            <!-- Content loaded via AJAX -->
+            <div class="flex justify-center items-center h-64">
+                <span class="loading loading-spinner loading-lg"></span>
+            </div>
+        </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+
+<script>
+function openQuickView(productId) {
+    const modal = document.getElementById('quickViewModal');
+    const content = document.getElementById('quickViewContent');
+    
+    modal.showModal();
+    content.innerHTML = '<div class="flex justify-center items-center h-64"><span class="loading loading-spinner loading-lg"></span></div>';
+    
+    fetch(`/product/${productId}/quick-view`)
+        .then(response => response.text())
+        .then(html => {
+            content.innerHTML = html;
+        })
+        .catch(error => {
+            content.innerHTML = '<div class="alert alert-error">Failed to load product details</div>';
+        });
+}
+</script>
+
+<%- include('./partials/footer') %>
+

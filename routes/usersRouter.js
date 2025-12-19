@@ -1,14 +1,9 @@
-const express=require('express')
-const router = express.Router()
-const{registerUser,loginUser,logout}=require("../controllers/authController")
-const isloggedIn=require("../middlewares/isLoggedIn")
+const express = require('express');
+const router = express.Router();
+const { logout } = require("../controllers/authController");
 
-router.get("/",function(req,res){
-    res.send("hey its working")
-})
+// User logout route (no authentication required - you don't need to be logged in to log out)
+// Note: Login and Register routes are handled in routes/index.js at root level
+router.get("/logout", logout);
 
-router.post("/register",registerUser)
-router.post("/login",loginUser)
-router.get("/logout",logout)
-
-module.exports=router;
+module.exports = router;

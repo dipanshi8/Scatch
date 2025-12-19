@@ -1,0 +1,134 @@
+<%- include('./partials/header') %>
+
+<!-- Hero Section -->
+<div class="hero bg-gradient-to-r from-primary to-secondary text-primary-content py-16 mb-8">
+    <div class="hero-content text-center">
+        <div class="max-w-2xl">
+            <h1 class="text-5xl font-bold mb-4">New Arrivals</h1>
+            <p class="text-xl opacity-90">Discover the latest additions to our premium collection</p>
+        </div>
+    </div>
+</div>
+
+<div class="container mx-auto px-4 py-8">
+    <% if (products && products.length > 0) { %>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+            <% products.forEach(function(product) { %>
+                <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
+                    <figure class="relative">
+                        <% 
+                        // Get image URL - prioritize images array, fallback to image field
+                        let imageUrl = '';
+                        if (product.images && product.images.length > 0) {
+                            const primaryImage = product.images.find(img => img.isPrimary) || product.images[0];
+                            imageUrl = primaryImage ? primaryImage.url : '';
+                        }
+                        if (!imageUrl && product.image) {
+                            imageUrl = product.image;
+                        }
+                        // Ensure image path starts with / if it's a local path
+                        if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('/') && !imageUrl.startsWith('data:')) {
+                            imageUrl = '/' + imageUrl;
+                        }
+                        %>
+                        <img src="<%= imageUrl %>" alt="<%= product.name %>" 
+                            class="w-full h-64 object-cover" 
+                            onerror="this.src='/images/bag-hanging-from-furniture-item-indoors.jpg'" />
+                        <div class="badge badge-primary absolute top-2 left-2">NEW</div>
+                        <% if (product.discountPrice > 0) { %>
+                            <div class="badge badge-error absolute top-2 right-2">
+                                <%= Math.round(((product.price - product.discountPrice) / product.price) * 100) %>% OFF
+                            </div>
+                        <% } %>
+                    </figure>
+                    <div class="card-body p-4">
+                        <h2 class="card-title text-base line-clamp-1">
+                            <%= product.name %>
+                        </h2>
+                        <p class="text-sm text-base-content/70 line-clamp-2 mb-2">
+                            <%= product.description %>
+                        </p>
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xl font-bold text-primary">
+                                ₹<%= product.discountPrice > 0 ? product.discountPrice : product.price %>
+                            </span>
+                            <% if (product.discountPrice > 0) { %>
+                                <span class="text-sm line-through text-base-content/50">
+                                    ₹<%= product.price %>
+                                </span>
+                            <% } %>
+                        </div>
+                        <div class="card-actions justify-between items-center">
+                            <div class="text-xs text-base-content/60">
+                                <i class="ri-stack-line"></i> <%= product.stockQuantity %> in stock
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="openQuickView('<%= product._id %>')" 
+                                    class="btn btn-sm btn-ghost">
+                                    <i class="ri-eye-line"></i>
+                                </button>
+                                <% if (typeof user !== 'undefined' && user !== null) { %>
+                                    <form action="/addtocart/<%= product._id %>" method="POST" class="inline">
+                                        <button type="submit" class="btn btn-sm btn-primary">
+                                            <i class="ri-shopping-cart-line"></i> Add to Cart
+                                        </button>
+                                    </form>
+                                <% } else { %>
+                                    <a href="/login" class="btn btn-sm btn-primary">
+                                        <i class="ri-shopping-cart-line"></i> Add to Cart
+                                    </a>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    <% } else { %>
+        <div class="text-center py-16">
+            <i class="ri-inbox-line text-6xl text-base-content/30 mb-4"></i>
+            <h3 class="text-2xl font-bold mb-2">No new arrivals yet</h3>
+            <p class="text-base-content/70 mb-6">Check back soon for new products!</p>
+            <a href="/shop" class="btn btn-primary">Browse All Products</a>
+        </div>
+    <% } %>
+</div>
+
+<!-- Quick View Modal -->
+<dialog id="quickViewModal" class="modal">
+    <div class="modal-box max-w-4xl">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+        <div id="quickViewContent">
+            <div class="flex justify-center items-center h-64">
+                <span class="loading loading-spinner loading-lg"></span>
+            </div>
+        </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+
+<script>
+function openQuickView(productId) {
+    const modal = document.getElementById('quickViewModal');
+    const content = document.getElementById('quickViewContent');
+    
+    modal.showModal();
+    content.innerHTML = '<div class="flex justify-center items-center h-64"><span class="loading loading-spinner loading-lg"></span></div>';
+    
+    fetch(`/product/${productId}/quick-view`)
+        .then(response => response.text())
+        .then(html => {
+            content.innerHTML = html;
+        })
+        .catch(error => {
+            content.innerHTML = '<div class="alert alert-error">Failed to load product details</div>';
+        });
+}
+</script>
+
+<%- include('./partials/footer') %>
+

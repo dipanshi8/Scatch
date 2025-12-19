@@ -1,0 +1,89 @@
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Product Images -->
+    <div>
+        <% 
+        // Get image URL - prioritize images array, fallback to image field
+        let imageUrl = '';
+        if (product.images && product.images.length > 0) {
+            const primaryImage = product.images.find(img => img.isPrimary) || product.images[0];
+            imageUrl = primaryImage ? primaryImage.url : '';
+        }
+        if (!imageUrl && product.image) {
+            imageUrl = product.image;
+        }
+        // Ensure image path starts with / if it's a local path
+        if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('/') && !imageUrl.startsWith('data:')) {
+            imageUrl = '/' + imageUrl;
+        }
+        %>
+        <img src="<%= imageUrl %>" alt="<%= product.name %>" 
+            class="w-full h-96 object-cover rounded-lg" 
+            onerror="this.src='/images/bag-hanging-from-furniture-item-indoors.jpg'" />
+        
+        <% if (product.images && product.images.length > 1) { %>
+            <div class="grid grid-cols-4 gap-2 mt-4">
+                <% product.images.slice(0, 4).forEach(function(img) { %>
+                    <img src="<%= img.url %>" alt="<%= product.name %>" 
+                        class="w-full h-20 object-cover rounded cursor-pointer hover:opacity-75" />
+                <% }); %>
+            </div>
+        <% } %>
+    </div>
+    
+    <!-- Product Details -->
+    <div>
+        <h2 class="text-3xl font-bold mb-4"><%= product.name %></h2>
+        
+        <div class="flex items-center gap-3 mb-4">
+            <span class="text-3xl font-bold text-primary">
+                ₹<%= product.discountPrice > 0 ? product.discountPrice : product.price %>
+            </span>
+            <% if (product.discountPrice > 0) { %>
+                <span class="text-xl line-through text-base-content/50">
+                    ₹<%= product.price %>
+                </span>
+                <span class="badge badge-error">
+                    <%= Math.round(((product.price - product.discountPrice) / product.price) * 100) %>% OFF
+                </span>
+            <% } %>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <div class="space-y-3 mb-6">
+            <div>
+                <span class="font-semibold">Category:</span>
+                <span class="badge badge-outline ml-2"><%= product.category %></span>
+            </div>
+            <div>
+                <span class="font-semibold">Stock:</span>
+                <span class="ml-2 <%= product.stockQuantity > 0 ? 'text-success' : 'text-error' %>">
+                    <%= product.stockQuantity > 0 ? product.stockQuantity + ' available' : 'Out of stock' %>
+                </span>
+            </div>
+        </div>
+        
+        <p class="text-base-content/70 mb-6"><%= product.description %></p>
+        
+        <div class="flex gap-3">
+            <% if (typeof user !== 'undefined' && user !== null) { %>
+                <form action="/addtocart/<%= product._id %>" method="POST" class="flex-1">
+                    <button type="submit" class="btn btn-primary w-full">
+                        <i class="ri-shopping-cart-line"></i> Add to Cart
+                    </button>
+                </form>
+                <a href="/product/<%= product._id %>" class="btn btn-outline">
+                    View Details
+                </a>
+            <% } else { %>
+                <a href="/login" class="btn btn-primary flex-1">
+                    <i class="ri-login-box-line"></i> Login to Add to Cart
+                </a>
+                <a href="/product/<%= product._id %>" class="btn btn-outline">
+                    View Details
+                </a>
+            <% } %>
+        </div>
+    </div>
+</div>
+

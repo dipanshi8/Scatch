@@ -1,0 +1,101 @@
+<nav class="navbar bg-base-100 shadow-lg sticky top-0 z-50 border-b border-base-300">
+    <div class="container mx-auto px-4">
+        <div class="flex-1">
+            <a href="/" class="btn btn-ghost text-xl font-bold text-primary">Scatch</a>
+        </div>
+        
+        <% 
+        // Check if user is logged in - use direct user check for clarity
+        var isUserLoggedIn = typeof user !== 'undefined' && user !== null;
+        var isAdminLoggedIn = typeof admin !== 'undefined' && admin !== null;
+        var cartItemCount = typeof cartCount !== 'undefined' ? cartCount : 0;
+        var cartLength = typeof cartLength !== 'undefined' ? cartLength : 0;
+        %>
+        
+        <div class="flex-none">
+            <ul class="menu menu-horizontal px-1 gap-3 items-center">
+                <!-- Shop Link -->
+                <li>
+                    <a href="/shop" class="font-medium hover:text-primary transition-colors">
+                        <i class="ri-store-2-line"></i> Shop
+                    </a>
+                </li>
+                
+                <!-- New Arrivals Link -->
+                <li>
+                    <a href="/new-arrivals" class="font-medium hover:text-primary transition-colors">
+                        <i class="ri-sparkling-line"></i> New Arrivals
+                    </a>
+                </li>
+                
+                <!-- Cart Link with Badge (always visible, redirects to login if not logged in) -->
+                <li>
+                    <% if (isUserLoggedIn) { %>
+                        <a href="/cart" class="font-medium hover:text-primary relative transition-colors">
+                            <i class="ri-shopping-cart-line text-xl"></i>
+                            <span class="hidden md:inline ml-1">Cart (<%= cartLength %>)</span>
+                            <% if (cartItemCount > 0) { %>
+                                <span class="badge badge-error badge-sm absolute -top-1 -right-1">
+                                    <%= cartItemCount %>
+                                </span>
+                            <% } %>
+                        </a>
+                    <% } else { %>
+                        <a href="/login" class="font-medium hover:text-primary relative transition-colors">
+                            <i class="ri-shopping-cart-line text-xl"></i>
+                            <span class="hidden md:inline ml-1">Cart</span>
+                        </a>
+                    <% } %>
+                </li>
+                
+                <!-- Login Button (only if NOT logged in) -->
+                <% if (!isUserLoggedIn && !isAdminLoggedIn) { %>
+                    <li>
+                        <a href="/login" class="btn btn-sm btn-outline border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all">
+                            Login
+                        </a>
+                    </li>
+                <% } %>
+                
+                <!-- Profile Dropdown (only if user is logged in) -->
+                <% if (isUserLoggedIn) { %>
+                    <li class="dropdown dropdown-end">
+                        <div tabindex="0" role="button" class="btn btn-ghost btn-circle p-2 hover:bg-gray-100 transition-colors">
+                            <!-- Minimalist SVG User Icon (Heroicons style) -->
+                            <svg class="w-6 h-6 text-gray-700 hover:text-gray-900 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </div>
+                        <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52 right-0">
+                            <li>
+                                <a href="/orders" class="hover:bg-gray-50 transition-colors">
+                                    <i class="ri-shopping-bag-3-line"></i> My Orders
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/users/logout" class="text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors">
+                                    <i class="ri-logout-box-line"></i> Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                <% } else if (isAdminLoggedIn) { %>
+                    <!-- Admin Dashboard Link -->
+                    <li>
+                        <a href="/admin/dashboard" class="font-medium hover:text-primary transition-colors">
+                            <i class="ri-dashboard-line"></i> Dashboard
+                        </a>
+                    </li>
+                    
+                    <!-- Admin Logout -->
+                    <li>
+                        <a href="/owners/logout" class="font-medium text-error hover:text-error transition-colors">
+                            <i class="ri-logout-box-line"></i> Logout
+                        </a>
+                    </li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+</nav>
+

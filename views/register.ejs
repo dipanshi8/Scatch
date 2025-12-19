@@ -1,0 +1,147 @@
+<%- include('./partials/header') %>
+
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <!-- Flash Messages -->
+        <% if(error && error.length>0){ %>
+            <div class="alert alert-error shadow-lg">
+                <div>
+                    <i class="ri-error-warning-line"></i>
+                    <span><%= error[0] %></span>
+                </div>
+            </div>
+        <% } %>
+
+        <% if(success && success.length>0){ %>
+            <div class="alert alert-success shadow-lg">
+                <div>
+                    <i class="ri-checkbox-circle-line"></i>
+                    <span><%= success[0] %></span>
+                </div>
+            </div>
+        <% } %>
+
+        <div class="card bg-base-100 shadow-2xl">
+            <div class="card-body">
+                <div class="text-center mb-6">
+                    <h2 class="text-3xl font-bold text-primary">Create Account</h2>
+                    <p class="text-base-content/70 mt-2">Join Scatch and start shopping</p>
+                </div>
+
+                <form action="/signup" method="POST" class="space-y-4">
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Full Name</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            name="fullname" 
+                            placeholder="Enter your full name" 
+                            class="input input-bordered w-full" 
+                            required
+                            autocomplete="name"
+                        />
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Email</span>
+                        </label>
+                        <input 
+                            type="email" 
+                            name="email" 
+                            placeholder="Enter your email" 
+                            class="input input-bordered w-full" 
+                            required
+                            autocomplete="email"
+                        />
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Password</span>
+                        </label>
+                        <input 
+                            type="password" 
+                            name="password" 
+                            placeholder="Create a password (min 6 characters)" 
+                            class="input input-bordered w-full" 
+                            required
+                            minlength="6"
+                            autocomplete="new-password"
+                        />
+                        <label class="label">
+                            <span class="label-text-alt">Minimum 6 characters</span>
+                        </label>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Gender</span>
+                        </label>
+                        <select 
+                            name="gender" 
+                            class="select select-bordered w-full" 
+                            required
+                        >
+                            <option value="" disabled selected>Select your gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Age</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            name="age" 
+                            placeholder="Enter your age" 
+                            class="input input-bordered w-full" 
+                            required
+                            min="13"
+                            max="120"
+                        />
+                        <label class="label">
+                            <span class="label-text-alt">Must be 13 or older</span>
+                        </label>
+                    </div>
+
+                    <div class="form-control mt-6">
+                        <button type="submit" class="btn btn-primary w-full">
+                            <i class="ri-user-add-line"></i>
+                            Create Account
+                        </button>
+                    </div>
+                </form>
+
+                <div class="divider">OR</div>
+
+                <div class="text-center">
+                    <p class="text-sm text-base-content/70">
+                        Already have an account? 
+                        <a href="/login" class="link link-primary font-semibold">Login</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-hide flash messages after 5 seconds
+setTimeout(() => {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        alert.style.transition = 'opacity 0.5s';
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 500);
+    });
+}, 5000);
+</script>
+
+<%- include('./partials/footer') %>
+

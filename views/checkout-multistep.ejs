@@ -1,0 +1,274 @@
+<%- include('./partials/header') %>
+
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <h1 class="text-4xl font-bold mb-8">Checkout</h1>
+    
+    <!-- Progress Steps -->
+    <ul class="steps steps-horizontal w-full mb-8">
+        <li class="step step-primary" id="step-shipping">Shipping</li>
+        <li class="step" id="step-payment">Payment</li>
+        <li class="step" id="step-review">Review</li>
+    </ul>
+    
+    <!-- Step 1: Shipping Address -->
+    <div id="shipping-step" class="step-content">
+        <div class="card bg-base-100 shadow-lg">
+            <div class="card-body">
+                <h2 class="card-title text-2xl mb-4">Shipping Information</h2>
+                
+                <form id="shipping-form" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Full Name *</span>
+                            </label>
+                            <input type="text" name="fullName" required 
+                                value="<%= user.fullname || '' %>"
+                                class="input input-bordered" />
+                        </div>
+                        
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">Phone Number *</span>
+                            </label>
+                            <input type="tel" name="phone" required 
+                                value="<%= user.address && user.address.phone ? user.address.phone : (user.contact || '') %>"
+                                class="input input-bordered" />
+                        </div>
+                    </div>
+                    
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text">Street Address *</span>
+                        </label>
+                        <input type="text" name="address" required
+                            value="<%= user.address && user.address.street ? user.address.street : '' %>"
+                            class="input input-bordered" />
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">City *</span>
+                            </label>
+                            <input type="text" name="city" required
+                                value="<%= user.address && user.address.city ? user.address.city : '' %>"
+                                class="input input-bordered" />
+                        </div>
+                        
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">State *</span>
+                            </label>
+                            <input type="text" name="state" required
+                                value="<%= user.address && user.address.state ? user.address.state : '' %>"
+                                class="input input-bordered" />
+                        </div>
+                        
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text">ZIP Code *</span>
+                            </label>
+                            <input type="text" name="zipCode" required
+                                value="<%= user.address && user.address.zipCode ? user.address.zipCode : '' %>"
+                                class="input input-bordered" />
+                        </div>
+                    </div>
+                    
+                    <div class="form-control mt-6">
+                        <button type="button" onclick="nextStep('payment')" class="btn btn-primary btn-lg">
+                            Continue to Payment <i class="ri-arrow-right-line"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Step 2: Payment Method -->
+    <div id="payment-step" class="step-content hidden">
+        <div class="card bg-base-100 shadow-lg">
+            <div class="card-body">
+                <h2 class="card-title text-2xl mb-4">Payment Method</h2>
+                
+                <div class="space-y-3">
+                    <label class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-base-200">
+                        <input type="radio" name="paymentMethod" value="COD" class="radio radio-primary" checked />
+                        <div class="flex-1">
+                            <div class="font-semibold">Cash on Delivery (COD)</div>
+                            <div class="text-sm text-base-content/70">Pay when you receive</div>
+                        </div>
+                    </label>
+                    
+                    <label class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-base-200">
+                        <input type="radio" name="paymentMethod" value="UPI" class="radio radio-primary" />
+                        <div class="flex-1">
+                            <div class="font-semibold">UPI</div>
+                            <div class="text-sm text-base-content/70">Pay via UPI apps</div>
+                        </div>
+                    </label>
+                    
+                    <label class="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-base-200">
+                        <input type="radio" name="paymentMethod" value="Card" class="radio radio-primary" />
+                        <div class="flex-1">
+                            <div class="font-semibold">Debit/Credit Card</div>
+                            <div class="text-sm text-base-content/70">Secure card payment</div>
+                        </div>
+                    </label>
+                </div>
+                
+                <div class="flex gap-3 mt-6">
+                    <button type="button" onclick="prevStep('shipping')" class="btn btn-outline flex-1">
+                        <i class="ri-arrow-left-line"></i> Back
+                    </button>
+                    <button type="button" onclick="nextStep('review')" class="btn btn-primary flex-1">
+                        Review Order <i class="ri-arrow-right-line"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Step 3: Review & Place Order -->
+    <div id="review-step" class="step-content hidden">
+        <div class="card bg-base-100 shadow-lg">
+            <div class="card-body">
+                <h2 class="card-title text-2xl mb-4">Review Your Order</h2>
+                
+                <!-- Order Summary -->
+                <div class="bg-base-200 p-4 rounded-lg mb-4">
+                    <h3 class="font-semibold mb-2">Order Summary</h3>
+                    <div class="space-y-1 text-sm">
+                        <div class="flex justify-between">
+                            <span>Subtotal</span>
+                            <span>₹<%= totalAmount %></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Platform Fee</span>
+                            <span>₹<%= platformFee %></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Shipping</span>
+                            <span class="text-success">FREE</span>
+                        </div>
+                        <div class="divider my-2"></div>
+                        <div class="flex justify-between font-bold text-lg">
+                            <span>Total</span>
+                            <span class="text-primary">₹<%= finalTotal %></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Shipping Address Preview -->
+                <div class="bg-base-200 p-4 rounded-lg mb-4">
+                    <h3 class="font-semibold mb-2">Shipping To</h3>
+                    <div id="shipping-preview" class="text-sm">
+                        <!-- Filled by JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Payment Method Preview -->
+                <div class="bg-base-200 p-4 rounded-lg mb-6">
+                    <h3 class="font-semibold mb-2">Payment Method</h3>
+                    <div id="payment-preview" class="text-sm">
+                        <!-- Filled by JavaScript -->
+                    </div>
+                </div>
+                
+                <form id="order-form" action="/order" method="POST" class="space-y-4">
+                    <!-- Hidden fields for shipping -->
+                    <input type="hidden" name="fullName" id="hidden-fullName" />
+                    <input type="hidden" name="address" id="hidden-address" />
+                    <input type="hidden" name="city" id="hidden-city" />
+                    <input type="hidden" name="state" id="hidden-state" />
+                    <input type="hidden" name="zipCode" id="hidden-zipCode" />
+                    <input type="hidden" name="phone" id="hidden-phone" />
+                    <input type="hidden" name="paymentMethod" id="hidden-paymentMethod" />
+                    
+                    <div class="flex gap-3">
+                        <button type="button" onclick="prevStep('payment')" class="btn btn-outline flex-1">
+                            <i class="ri-arrow-left-line"></i> Back
+                        </button>
+                        <button type="submit" class="btn btn-primary flex-1 btn-lg">
+                            <i class="ri-checkbox-circle-line"></i> Place Order
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let shippingData = {};
+let paymentMethod = 'COD';
+
+function nextStep(step) {
+    // Hide all steps
+    document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.step').forEach(el => el.classList.remove('step-primary'));
+    
+    // Show current step
+    if (step === 'payment') {
+        // Save shipping data
+        const form = document.getElementById('shipping-form');
+        shippingData = {
+            fullName: form.fullName.value,
+            address: form.address.value,
+            city: form.city.value,
+            state: form.state.value,
+            zipCode: form.zipCode.value,
+            phone: form.phone.value
+        };
+        
+        document.getElementById('payment-step').classList.remove('hidden');
+        document.getElementById('step-payment').classList.add('step-primary');
+    } else if (step === 'review') {
+        // Save payment method
+        paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+        
+        // Update previews
+        document.getElementById('shipping-preview').innerHTML = `
+            ${shippingData.fullName}<br>
+            ${shippingData.address}<br>
+            ${shippingData.city}, ${shippingData.state} ${shippingData.zipCode}<br>
+            Phone: ${shippingData.phone}
+        `;
+        
+        const paymentMethods = {
+            'COD': 'Cash on Delivery',
+            'UPI': 'UPI',
+            'Card': 'Debit/Credit Card'
+        };
+        document.getElementById('payment-preview').textContent = paymentMethods[paymentMethod];
+        
+        // Set hidden form fields
+        document.getElementById('hidden-fullName').value = shippingData.fullName;
+        document.getElementById('hidden-address').value = shippingData.address;
+        document.getElementById('hidden-city').value = shippingData.city;
+        document.getElementById('hidden-state').value = shippingData.state;
+        document.getElementById('hidden-zipCode').value = shippingData.zipCode;
+        document.getElementById('hidden-phone').value = shippingData.phone;
+        document.getElementById('hidden-paymentMethod').value = paymentMethod;
+        
+        document.getElementById('review-step').classList.remove('hidden');
+        document.getElementById('step-review').classList.add('step-primary');
+    }
+}
+
+function prevStep(step) {
+    document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.step').forEach(el => el.classList.remove('step-primary'));
+    
+    if (step === 'shipping') {
+        document.getElementById('shipping-step').classList.remove('hidden');
+        document.getElementById('step-shipping').classList.add('step-primary');
+    } else if (step === 'payment') {
+        document.getElementById('payment-step').classList.remove('hidden');
+        document.getElementById('step-payment').classList.add('step-primary');
+    }
+}
+</script>
+
+<%- include('./partials/footer') %>
+

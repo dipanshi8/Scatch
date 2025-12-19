@@ -1,0 +1,94 @@
+<%- include('./partials/header') %>
+
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <a href="/orders" class="text-blue-500 hover:text-blue-700 mb-4 inline-block">← Back to Orders</a>
+        
+        <div class="bg-white rounded-lg shadow p-8">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">Order #<%= order._id.toString().substring(0, 8) %></h1>
+                    <p class="text-gray-600">Placed on <%= new Date(order.orderDate).toLocaleString() %></p>
+                </div>
+                <span class="px-4 py-2 rounded-full text-sm font-semibold
+                    <%= order.status === 'delivered' ? 'bg-green-100 text-green-800' : 
+                        order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                        order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                        'bg-yellow-100 text-yellow-800' %>">
+                    <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+                </span>
+            </div>
+            
+            <div class="border-t pt-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">Shipping Address</h2>
+                <div class="bg-gray-50 p-4 rounded">
+                    <p><%= order.shippingAddress.fullName %></p>
+                    <p><%= order.shippingAddress.address %></p>
+                    <p><%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> <%= order.shippingAddress.zipCode %></p>
+                    <p>Phone: <%= order.shippingAddress.phone %></p>
+                </div>
+            </div>
+            
+            <div class="border-t pt-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">Order Items</h2>
+                <div class="space-y-4">
+                    <% order.items.forEach(function(item) { %>
+                        <div class="flex gap-4 p-4 bg-gray-50 rounded">
+                            <div class="w-24 h-24 flex items-center justify-center bg-white rounded">
+                                <% 
+                                // Get image URL - prioritize images array, fallback to image field
+                                let imageUrl = '';
+                                if (item.product.images && item.product.images.length > 0) {
+                                    const primaryImage = item.product.images.find(img => img.isPrimary) || item.product.images[0];
+                                    imageUrl = primaryImage ? primaryImage.url : '';
+                                }
+                                if (!imageUrl && item.product.image) {
+                                    imageUrl = item.product.image;
+                                }
+                                // Ensure image path starts with / if it's a local path
+                                if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('/') && !imageUrl.startsWith('data:')) {
+                                    imageUrl = '/' + imageUrl;
+                                }
+                                %>
+                                <img src="<%= imageUrl %>" alt="<%= item.product.name %>" 
+                                    class="max-w-full max-h-full object-contain"
+                                    onerror="this.src='/images/bag-hanging-from-furniture-item-indoors.jpg'" />
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-semibold"><%= item.product.name %></h3>
+                                <p class="text-gray-600">Quantity: <%= item.quantity %></p>
+                                <p class="text-gray-600">Price: ₹<%= item.price %> each</p>
+                                <% if (item.discount > 0) { %>
+                                    <p class="text-gray-600">Discount: ₹<%= item.discount %></p>
+                                <% } %>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-lg font-bold">₹<%= (item.price - item.discount) * item.quantity %></p>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+            
+            <div class="border-t pt-6">
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span>Subtotal</span>
+                        <span>₹<%= order.totalAmount - order.platformFee %></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Platform Fee</span>
+                        <span>₹<%= order.platformFee %></span>
+                    </div>
+                    <div class="flex justify-between text-xl font-bold pt-2 border-t">
+                        <span>Total</span>
+                        <span class="text-green-600">₹<%= order.totalAmount %></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('./partials/footer') %>
+

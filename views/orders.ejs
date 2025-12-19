@@ -1,0 +1,61 @@
+<%- include('./partials/header') %>
+
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">My Orders</h1>
+        
+        <% if (orders && orders.length > 0) { %>
+            <div class="space-y-6">
+                <% orders.forEach(function(order) { %>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-semibold">Order #<%= order._id.toString().substring(0, 8) %></h3>
+                                <p class="text-gray-600 text-sm">Placed on <%= new Date(order.orderDate).toLocaleDateString() %></p>
+                            </div>
+                            <div class="text-right">
+                                <span class="px-3 py-1 rounded-full text-sm font-semibold
+                                    <%= order.status === 'delivered' ? 'bg-green-100 text-green-800' : 
+                                        order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                        order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                                        'bg-yellow-100 text-yellow-800' %>">
+                                    <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
+                                </span>
+                                <p class="text-lg font-bold text-green-600 mt-2">₹<%= order.totalAmount %></p>
+                            </div>
+                        </div>
+                        
+                        <div class="border-t pt-4">
+                            <h4 class="font-semibold mb-2">Items:</h4>
+                            <div class="space-y-2">
+                                <% order.items.forEach(function(item) { %>
+                                    <div class="flex justify-between text-sm">
+                                        <span><%= item.product.name %> x <%= item.quantity %></span>
+                                        <span>₹<%= (item.price - item.discount) * item.quantity %></span>
+                                    </div>
+                                <% }); %>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <a href="/order/<%= order._id %>" class="text-blue-600 hover:text-blue-800">
+                                View Details →
+                            </a>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+        <% } else { %>
+            <div class="bg-white rounded-lg shadow p-12 text-center">
+                <h2 class="text-2xl font-semibold mb-4">No orders yet</h2>
+                <p class="text-gray-600 mb-6">Start shopping to place your first order!</p>
+                <a href="/shop" class="inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition">
+                    Go to Shop
+                </a>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<%- include('./partials/footer') %>
+
