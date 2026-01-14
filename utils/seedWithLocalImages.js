@@ -80,7 +80,7 @@ const productData = [
     discountPrice: 10999,
     category: "Handbags",
     stockQuantity: 14,
-    image: "1bag.png",
+    image: "1bag.jpg",
     featured: false
   },
   {
@@ -90,7 +90,7 @@ const productData = [
     discountPrice: 3499,
     category: "Handbags",
     stockQuantity: 22,
-    image: "2bag.png",
+    image: "2bag.jpg",
     featured: false
   },
   {
@@ -100,7 +100,7 @@ const productData = [
     discountPrice: 7999,
     category: "Handbags",
     stockQuantity: 10,
-    image: "3bag 1.png",
+    image: "3bag 1.jpg",
     featured: false
   },
   {
@@ -110,7 +110,7 @@ const productData = [
     discountPrice: 5499,
     category: "Handbags",
     stockQuantity: 16,
-    image: "4bag.png",
+    image: "4bag.jpg",
     featured: false
   },
   {
@@ -120,7 +120,7 @@ const productData = [
     discountPrice: 0,
     category: "Backpacks",
     stockQuantity: 12,
-    image: "5bag.png",
+    image: "5bag.jpg",
     featured: false
   },
   {
@@ -130,7 +130,7 @@ const productData = [
     discountPrice: 6499,
     category: "Handbags",
     stockQuantity: 18,
-    image: "6bag.png",
+    image: "6bag.jpg",
     featured: false
   },
   {
@@ -140,7 +140,7 @@ const productData = [
     discountPrice: 13999,
     category: "Handbags",
     stockQuantity: 8,
-    image: "7bag.png",
+    image: "7bag.jpg",
     featured: false
   },
   {
@@ -150,68 +150,49 @@ const productData = [
     discountPrice: 4999,
     category: "Clutches",
     stockQuantity: 20,
-    image: "image 80.png",
+    image: "image 80.jpg",
     featured: false
   }
 ];
 
 /**
  * Seed database with products using local images
- * Uses upsert to add new products while preserving existing ones
+ * Always deletes existing products and reseeds with correct data
  */
 async function seedWithLocalImages() {
   try {
-    console.log('📦 Upserting products with local images...');
+    console.log('📦 Deleting existing products and reseeding with local images...');
     
-    let upsertedCount = 0;
-    let updatedCount = 0;
+    // Delete all existing products to ensure clean reseed
+    await productModel.deleteMany({});
+    console.log('✅ Deleted existing products');
     
-    for (const data of productData) {
-      const updateData = {
-        name: data.name,
-        description: data.description,
-        price: data.price,
-        discountPrice: data.discountPrice,
-        category: data.category,
-        stockQuantity: data.stockQuantity,
-        images: [{
-          url: data.image,
-          publicId: `local/${path.basename(data.image)}`,
-          isPrimary: true
-        }],
-        featured: data.featured,
-        // Legacy fields for backward compatibility
-        image: data.image,
-        bgcolor: '#ffffff',
-        panelcolor: '#f3f4f6',
-        textcolor: '#000000',
-        discount: data.discountPrice > 0 ? data.price - data.discountPrice : 0,
-        stock: data.stockQuantity
-      };
-      
-      const result = await productModel.findOneAndUpdate(
-        { image: data.image }, // Filter by image filename
-        updateData,
-        { 
-          upsert: true, 
-          new: true, 
-          runValidators: true 
-        }
-      );
-      
-      if (result.upsertedCount > 0) {
-        upsertedCount++;
-      } else {
-        updatedCount++;
-      }
-    }
+    const products = productData.map(data => ({
+      name: data.name,
+      description: data.description,
+      price: data.price,
+      discountPrice: data.discountPrice,
+      category: data.category,
+      stockQuantity: data.stockQuantity,
+      images: [{
+        url: data.image,
+        publicId: `local/${path.basename(data.image)}`,
+        isPrimary: true
+      }],
+      featured: data.featured,
+      // Legacy fields for backward compatibility
+      image: data.image,
+      bgcolor: '#ffffff',
+      panelcolor: '#f3f4f6',
+      textcolor: '#000000',
+      discount: data.discountPrice > 0 ? data.price - data.discountPrice : 0,
+      stock: data.stockQuantity
+    }));
     
-    console.log(`✅ Successfully processed products: ${upsertedCount} new, ${updatedCount} updated`);
+    await productModel.insertMany(products);
+    console.log(`✅ Successfully seeded ${products.length} products with local images!`);
     
-    // Log total products and category distribution
-    const totalProducts = await productModel.countDocuments();
-    console.log(`📊 Total products in database: ${totalProducts}`);
-    
+    // Log category distribution
     const categoryStats = await productModel.aggregate([
       { $group: { _id: '$category', count: { $sum: 1 } } }
     ]);
