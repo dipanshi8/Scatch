@@ -59,13 +59,14 @@
                                     if (!imageUrl && product.image) {
                                         imageUrl = product.image;
                                     }
-                                    // Ensure image path starts with / if it's a local path
-                                    if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('/') && !imageUrl.startsWith('data:')) {
-                                        imageUrl = '/' + imageUrl;
+                                    // Ensure image path starts with /images/ if it's a local path
+                                    if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('/images/') && !imageUrl.startsWith('data:')) {
+                                        imageUrl = '/images/' + imageUrl;
                                     }
                                     %>
                                     <img src="<%= imageUrl %>" alt="<%= product.name %>" 
-                                        class="w-16 h-16 object-cover rounded"
+                                        class="w-16 h-16 object-cover rounded product-card"
+                                        loading="lazy"
                                         onerror="this.src='/images/bag-hanging-from-furniture-item-indoors.jpg'" />
                                     <div class="flex-1">
                                         <p class="font-semibold text-sm line-clamp-1"><%= product.name %></p>

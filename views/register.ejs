@@ -3,23 +3,25 @@
 <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-100 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
         <!-- Flash Messages -->
-        <% if(error && error.length>0){ %>
-            <div class="alert alert-error shadow-lg">
-                <div>
-                    <i class="ri-error-warning-line"></i>
-                    <span><%= error[0] %></span>
+        <div id="flash-container">
+            <% if(error && error.length>0){ %>
+                <div class="alert alert-error shadow-lg">
+                    <div>
+                        <i class="ri-error-warning-line"></i>
+                        <span><%= error[0] %></span>
+                    </div>
                 </div>
-            </div>
-        <% } %>
+            <% } %>
 
-        <% if(success && success.length>0){ %>
-            <div class="alert alert-success shadow-lg">
-                <div>
-                    <i class="ri-checkbox-circle-line"></i>
-                    <span><%= success[0] %></span>
+            <% if(success && success.length>0){ %>
+                <div class="alert alert-success shadow-lg">
+                    <div>
+                        <i class="ri-checkbox-circle-line"></i>
+                        <span><%= success[0] %></span>
+                    </div>
                 </div>
-            </div>
-        <% } %>
+            <% } %>
+        </div>
 
         <div class="card bg-base-100 shadow-2xl">
             <div class="card-body">
@@ -61,15 +63,20 @@
                         <label class="label">
                             <span class="label-text">Password</span>
                         </label>
-                        <input 
-                            type="password" 
-                            name="password" 
-                            placeholder="Create a password (min 6 characters)" 
-                            class="input input-bordered w-full" 
-                            required
-                            minlength="6"
-                            autocomplete="new-password"
-                        />
+                        <div class="relative">
+                            <input 
+                                type="password" 
+                                name="password" 
+                                placeholder="Create a password (min 6 characters)" 
+                                class="input input-bordered w-full pr-10" 
+                                required
+                                minlength="6"
+                                autocomplete="new-password"
+                            />
+                            <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600" onclick="togglePassword(this)">
+                                <i class="ri-eye-line"></i>
+                            </button>
+                        </div>
                         <label class="label">
                             <span class="label-text-alt">Minimum 6 characters</span>
                         </label>
@@ -132,15 +139,28 @@
 </div>
 
 <script>
-// Auto-hide flash messages after 5 seconds
+// Auto-hide flash messages after 3 seconds
 setTimeout(() => {
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(alert => {
-        alert.style.transition = 'opacity 0.5s';
-        alert.style.opacity = '0';
-        setTimeout(() => alert.remove(), 500);
-    });
-}, 5000);
+    const container = document.getElementById('flash-container');
+    if (container) {
+        container.style.transition = 'opacity 0.5s';
+        container.style.opacity = '0';
+        setTimeout(() => container.remove(), 500);
+    }
+}, 3000);
+
+function togglePassword(button) {
+    const input = button.parentElement.querySelector('input');
+    const icon = button.querySelector('i');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'ri-eye-off-line';
+    } else {
+        input.type = 'password';
+        icon.className = 'ri-eye-line';
+    }
+}
 </script>
 
 <%- include('./partials/footer') %>

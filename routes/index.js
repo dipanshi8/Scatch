@@ -54,12 +54,12 @@ router.post("/signup", registerUser);
 // Shop page - Product listing with category filtering
 router.get("/shop", async function (req, res) {
   try {
-    let query = {};
+    let query = { stockQuantity: { $gt: 0 } };
     const category = req.query.category;
     const search = req.query.search;
     
-    // Category filter (Backpacks, Handbags, Clutches)
-    if (category && ['Backpacks', 'Handbags', 'Clutches'].includes(category)) {
+    // Category filter
+    if (category) {
       query.category = category;
     }
     
@@ -71,8 +71,7 @@ router.get("/shop", async function (req, res) {
       ];
     }
     
-    // Only show in-stock products
-    query.stockQuantity = { $gt: 0 };
+    // Only show in-stock products (already in query)
     
     const products = await productModel.find(query).sort({ createdAt: -1 });
     

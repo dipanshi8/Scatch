@@ -1,21 +1,23 @@
 <%- include('./partials/header') %>
 
 <!-- Flash Messages -->
-<% if(error && error.length>0){ %>
-    <div class="toast toast-top toast-center z-50">
-        <div class="alert alert-error">
-            <span><%= error[0] %></span>
+<div id="flash-container">
+    <% if(error && error.length>0){ %>
+        <div class="toast toast-top toast-center z-50">
+            <div class="alert alert-error">
+                <span><%= error[0] %></span>
+            </div>
         </div>
-    </div>
-<% } %>
+    <% } %>
 
-<% if(success && success.length>0){ %>
-    <div class="toast toast-top toast-center z-50">
-        <div class="alert alert-success">
-            <span><%= success[0] %></span>
+    <% if(success && success.length>0){ %>
+        <div class="toast toast-top toast-center z-50">
+            <div class="alert alert-success">
+                <span><%= success[0] %></span>
+            </div>
         </div>
-    </div>
-<% } %>
+    <% } %>
+</div>
 
 <!-- Hero Section -->
 <div class="hero bg-base-200 py-16 mb-8">
@@ -35,6 +37,14 @@
             </form>
         </div>
     </div>
+</div>
+
+<!-- Category Filters -->
+<div class="mb-8 flex flex-wrap gap-4 justify-center">
+    <button class="btn btn-outline" onclick="filterCategory()">All Products</button>
+    <button class="btn btn-outline" onclick="filterCategory('Handbags')">Handbags</button>
+    <button class="btn btn-outline" onclick="filterCategory('Backpacks')">Backpacks</button>
+    <button class="btn btn-outline" onclick="filterCategory('Clutches')">Clutches</button>
 </div>
 
 <div class="container mx-auto px-4 py-8">
@@ -90,7 +100,7 @@
         <!-- Products Grid -->
         <main class="flex-1">
             <% if (products && products.length > 0) { %>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     <% products.forEach(function(product) { %>
                         <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow">
                             <figure class="relative">
@@ -104,13 +114,14 @@
                                 if (!imageUrl && product.image) {
                                     imageUrl = product.image;
                                 }
-                                // Ensure image path starts with / if it's a local path
-                                if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('/') && !imageUrl.startsWith('data:')) {
-                                    imageUrl = '/' + imageUrl;
+                                // Ensure image path starts with /images/ if it's a local path
+                                if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('/images/') && !imageUrl.startsWith('data:')) {
+                                    imageUrl = '/images/' + imageUrl;
                                 }
                                 %>
                                 <img src="<%= imageUrl %>" alt="<%= product.name %>" 
-                                    class="w-full h-64 object-cover" 
+                                    class="w-full h-64 product-card" 
+                                    loading="lazy"
                                     onerror="this.src='/images/bag-hanging-from-furniture-item-indoors.jpg'" />
                                 <% if (product.discountPrice > 0) { %>
                                     <div class="badge badge-error absolute top-2 right-2">
@@ -211,6 +222,47 @@ function openQuickView(productId) {
             content.innerHTML = '<div class="alert alert-error">Failed to load product details</div>';
         });
 }
+
+function filterCategory(category) {
+    const grid = document.getElementById('product-grid');
+    const originalOpacity = grid.style.opacity || '1';
+    
+    // Add loading effect
+    grid.style.opacity = '0.5';
+    grid.style.transition = 'opacity 0.3s ease';
+    
+    let url = '/shop';
+    if (category) url += `?category=${category}`;
+    
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newGrid = doc.getElementById('product-grid');
+            if (newGrid) {
+                grid.innerHTML = newGrid.innerHTML;
+                grid.style.opacity = originalOpacity;
+            } else {
+                grid.style.opacity = originalOpacity;
+                console.error('Could not find product grid in response');
+            }
+        })
+        .catch(error => {
+            console.error('Error filtering products:', error);
+            grid.style.opacity = originalOpacity;
+        });
+}
+
+// Auto-hide flash messages after 3 seconds
+setTimeout(() => {
+    const container = document.getElementById('flash-container');
+    if (container) {
+        container.style.transition = 'opacity 0.5s';
+        container.style.opacity = '0';
+        setTimeout(() => container.remove(), 500);
+    }
+}, 3000);
 </script>
 
 <%- include('./partials/footer') %>

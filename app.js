@@ -3,6 +3,7 @@ require("dotenv").config();
 
 const express = require('express');
 const app = express();
+const compression = require('compression');
 const cookieParser = require("cookie-parser");
 const path = require("path");
 // CRITICAL: Session must be required before flash
@@ -20,6 +21,9 @@ const indexRouter = require('./routes/index');
 // MIDDLEWARE SETUP - CRITICAL ORDER (DO NOT CHANGE)
 // ============================================
 // These MUST be in this EXACT order after express() initialization
+
+// 0. Compression middleware (must be first)
+app.use(compression());
 
 // 1. Cookie Parser
 app.use(cookieParser());
@@ -45,8 +49,7 @@ app.use(session({
 app.use(flash());
 
 // 5. Static files (after session/flash setup)
-app.use(express.static(path.join(__dirname, "public")));
-app.use('/images', express.static(path.join(__dirname, "images")));
+app.use(express.static(path.join(__dirname, "public"), { maxAge: '1y', immutable: true })); // 24 hours in milliseconds
 
 // 6. View engine setup
 app.set("view engine", "ejs");

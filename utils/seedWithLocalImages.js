@@ -10,7 +10,7 @@ const productData = [
     discountPrice: 6999,
     category: "Handbags",
     stockQuantity: 15,
-    image: "/images/beautiful-elegance-luxury-fashion-pink-women-handbag.jpg",
+    image: "beautiful-elegance-luxury-fashion-pink-women-handbag.jpg",
     featured: true
   },
   {
@@ -20,7 +20,7 @@ const productData = [
     discountPrice: 9999,
     category: "Handbags",
     stockQuantity: 12,
-    image: "/images/beautiful-elegance-luxury-fashion-green-handbag.jpg",
+    image: "beautiful-elegance-luxury-fashion-green-handbag.jpg",
     featured: true
   },
   {
@@ -30,7 +30,7 @@ const productData = [
     discountPrice: 0,
     category: "Handbags",
     stockQuantity: 8,
-    image: "/images/luxury-handbag-leather-female-hand.jpg",
+    image: "luxury-handbag-leather-female-hand.jpg",
     featured: false
   },
   {
@@ -40,7 +40,7 @@ const productData = [
     discountPrice: 4499,
     category: "Handbags",
     stockQuantity: 20,
-    image: "/images/still-life-say-no-fast-fashion.jpg",
+    image: "still-life-say-no-fast-fashion.jpg",
     featured: false
   },
   {
@@ -50,7 +50,7 @@ const productData = [
     discountPrice: 5999,
     category: "Handbags",
     stockQuantity: 18,
-    image: "/images/bag-hanging-from-furniture-item-indoors.jpg",
+    image: "bag-hanging-from-furniture-item-indoors.jpg",
     featured: false
   },
   {
@@ -60,7 +60,7 @@ const productData = [
     discountPrice: 8999,
     category: "Handbags",
     stockQuantity: 10,
-    image: "/images/pink-handbags.jpg",
+    image: "pink-handbags.jpg",
     featured: true
   },
   {
@@ -70,23 +70,104 @@ const productData = [
     discountPrice: 14999,
     category: "Handbags",
     stockQuantity: 6,
-    image: "/images/levitating-women-s-bag-display.jpg",
+    image: "levitating-women-s-bag-display.jpg",
     featured: true
+  },
+  {
+    name: "Elegant Black Leather Bag",
+    description: "Sophisticated black leather bag perfect for formal occasions. Timeless design with premium craftsmanship and durable materials.",
+    price: 12999,
+    discountPrice: 10999,
+    category: "Handbags",
+    stockQuantity: 14,
+    image: "1bag.png",
+    featured: false
+  },
+  {
+    name: "Casual Canvas Tote",
+    description: "Versatile canvas tote bag ideal for everyday use. Spacious and lightweight, perfect for shopping or work.",
+    price: 3999,
+    discountPrice: 3499,
+    category: "Handbags",
+    stockQuantity: 22,
+    image: "2bag.png",
+    featured: false
+  },
+  {
+    name: "Designer Patterned Handbag",
+    description: "Stylish patterned handbag with unique design elements. Combines fashion and functionality for the modern woman.",
+    price: 8999,
+    discountPrice: 7999,
+    category: "Handbags",
+    stockQuantity: 10,
+    image: "3bag 1.png",
+    featured: false
+  },
+  {
+    name: "Compact Crossbody Bag",
+    description: "Compact and convenient crossbody bag for on-the-go style. Secure and fashionable, perfect for travel or daily outings.",
+    price: 6499,
+    discountPrice: 5499,
+    category: "Handbags",
+    stockQuantity: 16,
+    image: "4bag.png",
+    featured: false
+  },
+  {
+    name: "Vintage Inspired Satchel",
+    description: "Vintage-inspired satchel with classic charm. Spacious interior and adjustable straps for comfort and style.",
+    price: 9999,
+    discountPrice: 0,
+    category: "Backpacks",
+    stockQuantity: 12,
+    image: "5bag.png",
+    featured: false
+  },
+  {
+    name: "Boho Fringe Bag",
+    description: "Bohemian style fringe bag with artistic flair. Free-spirited design perfect for casual and artistic occasions.",
+    price: 7499,
+    discountPrice: 6499,
+    category: "Handbags",
+    stockQuantity: 18,
+    image: "6bag.png",
+    featured: false
+  },
+  {
+    name: "Executive Briefcase Bag",
+    description: "Professional briefcase bag for the working woman. Organized compartments and sleek design for business meetings.",
+    price: 15999,
+    discountPrice: 13999,
+    category: "Handbags",
+    stockQuantity: 8,
+    image: "7bag.png",
+    featured: false
+  },
+  {
+    name: "Artistic Print Clutch",
+    description: "Eye-catching artistic print clutch bag. Perfect for evening events and special occasions with a touch of creativity.",
+    price: 5999,
+    discountPrice: 4999,
+    category: "Clutches",
+    stockQuantity: 20,
+    image: "image 80.png",
+    featured: false
   }
 ];
 
 /**
- * Seed database with 7 products using local images
- * Only seeds if database is empty
+ * Seed database with products using local images
+ * Uses upsert to add new products while preserving existing ones
  */
 async function seedWithLocalImages() {
   try {
-    const productCount = await productModel.countDocuments();
+    console.log('📦 Upserting products with local images...');
     
-    if (productCount === 0) {
-      console.log('📦 No products found. Seeding 7 products with local images...');
-      
-      const products = productData.map(data => ({
+    let upsertedCount = 0;
+    let updatedCount = 0;
+    
+    for (const data of productData) {
+      const updateData = {
         name: data.name,
         description: data.description,
         price: data.price,
@@ -106,25 +187,40 @@ async function seedWithLocalImages() {
         textcolor: '#000000',
         discount: data.discountPrice > 0 ? data.price - data.discountPrice : 0,
         stock: data.stockQuantity
-      }));
+      };
       
-      await productModel.insertMany(products);
-      console.log(`✅ Successfully seeded ${products.length} products with local images!`);
+      const result = await productModel.findOneAndUpdate(
+        { image: data.image }, // Filter by image filename
+        updateData,
+        { 
+          upsert: true, 
+          new: true, 
+          runValidators: true 
+        }
+      );
       
-      // Log category distribution
-      const categoryStats = await productModel.aggregate([
-        { $group: { _id: '$category', count: { $sum: 1 } } }
-      ]);
-      console.log('📊 Category distribution:');
-      categoryStats.forEach(stat => {
-        console.log(`   ${stat._id}: ${stat.count} products`);
-      });
-      
-      return true;
-    } else {
-      console.log(`✅ Products already exist (${productCount} products found). Skipping seed.`);
-      return false;
+      if (result.upsertedCount > 0) {
+        upsertedCount++;
+      } else {
+        updatedCount++;
+      }
     }
+    
+    console.log(`✅ Successfully processed products: ${upsertedCount} new, ${updatedCount} updated`);
+    
+    // Log total products and category distribution
+    const totalProducts = await productModel.countDocuments();
+    console.log(`📊 Total products in database: ${totalProducts}`);
+    
+    const categoryStats = await productModel.aggregate([
+      { $group: { _id: '$category', count: { $sum: 1 } } }
+    ]);
+    console.log('📊 Category distribution:');
+    categoryStats.forEach(stat => {
+      console.log(`   ${stat._id}: ${stat.count} products`);
+    });
+    
+    return true;
   } catch (error) {
     console.error('❌ Error seeding products with local images:', error.message);
     return false;

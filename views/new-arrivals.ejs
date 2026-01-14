@@ -27,12 +27,13 @@
                             imageUrl = product.image;
                         }
                         // Ensure image path starts with / if it's a local path
-                        if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('/') && !imageUrl.startsWith('data:')) {
-                            imageUrl = '/' + imageUrl;
+                        if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('/images/') && !imageUrl.startsWith('data:')) {
+                            imageUrl = '/images/' + imageUrl;
                         }
                         %>
                         <img src="<%= imageUrl %>" alt="<%= product.name %>" 
-                            class="w-full h-64 object-cover" 
+                            class="w-full h-64 object-contain product-card" 
+                            loading="lazy"
                             onerror="this.src='/images/bag-hanging-from-furniture-item-indoors.jpg'" />
                         <div class="badge badge-primary absolute top-2 left-2">NEW</div>
                         <% if (product.discountPrice > 0) { %>
