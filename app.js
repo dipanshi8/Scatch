@@ -163,6 +163,11 @@ app.use("/owners", ownersRouter);
 app.use("/users", usersRouter);
 app.use("/products", productsRouter);
 
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.status(200).json({ success: true, message: "Server is running" });
+});
+
 // Error handling middleware (must be after routes)
 app.use((err, req, res, next) => {
   console.error('Error:', err);

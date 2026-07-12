@@ -40,11 +40,11 @@ desktop.ini
 .settings/
 
 # Large media files (keep structure, ignore content)
-public/images/*.jpg
-public/images/*.png
-public/images/*.jpeg
-public/images/*.gif
-public/images/*.webp
+# public/images/*.jpg
+# public/images/*.png
+# public/images/*.jpeg
+# public/images/*.gif
+# public/images/*.webp
 
 # Screenshots
 # Temporary files
