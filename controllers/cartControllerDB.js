@@ -2,19 +2,6 @@ const productModel = require("../models/product-model");
 const userModel = require("../models/user-model");
 
 /**
- * Get user's cart from database
- */
-async function getUserCart(userId) {
-  try {
-    const user = await userModel.findById(userId).populate('cart.product');
-    return user ? user.cart : [];
-  } catch (error) {
-    console.error("Error getting user cart:", error);
-    return [];
-  }
-}
-
-/**
  * Add item to cart (database-persisted)
  */
 module.exports.addToCart = async function (req, res) {
@@ -87,12 +74,14 @@ module.exports.addToCart = async function (req, res) {
 };
 
 /**
- * Update cart item quantity
+ * Update cart item quantity.
+ * Called via form POST from cart.ejs — redirects back to /cart (SSR flow).
  */
 module.exports.updateCartQuantity = async function (req, res) {
   try {
     if (!req.user || !req.user._id) {
-      return res.json({ success: false, message: "Please login" });
+      req.flash("error", "Please login!");
+      return res.redirect("/login");
     }
 
     const { productId, action } = req.body;
@@ -101,14 +90,16 @@ module.exports.updateCartQuantity = async function (req, res) {
     const cartItem = user.cart.find(item => item.product._id.toString() === productId);
 
     if (!cartItem) {
-      return res.json({ success: false, message: "Item not found in cart" });
+      req.flash("error", "Item not found in cart");
+      return res.redirect("/cart");
     }
 
     if (action === 'increase') {
       if (cartItem.quantity < cartItem.product.stockQuantity) {
         cartItem.quantity += 1;
       } else {
-        return res.json({ success: false, message: "Maximum stock reached" });
+        req.flash("error", "Maximum stock reached");
+        return res.redirect("/cart");
       }
     } else if (action === 'decrease') {
       cartItem.quantity -= 1;
@@ -118,24 +109,11 @@ module.exports.updateCartQuantity = async function (req, res) {
     }
 
     await user.save();
-
-    // Recalculate totals
-    const cartItems = await getUserCart(req.user._id);
-    let totalAmount = 0;
-    cartItems.forEach(item => {
-      const price = item.product.discountPrice > 0 ? item.product.discountPrice : item.product.price;
-      totalAmount += price * item.quantity;
-    });
-
-    res.json({ 
-      success: true, 
-      cart: cartItems,
-      totalAmount: totalAmount,
-      cartCount: cartItems.reduce((sum, item) => sum + item.quantity, 0)
-    });
+    res.redirect("/cart");
   } catch (err) {
     console.error("Update cart error:", err.message);
-    res.json({ success: false, message: "Failed to update cart" });
+    req.flash("error", "Failed to update cart");
+    res.redirect("/cart");
   }
 };
 

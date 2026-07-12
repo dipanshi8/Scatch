@@ -61,23 +61,23 @@ if (process.env.NODE_ENV === "development") {
 // Admin dashboard function (shared)
 async function renderAdminDashboard(req, res) {
   try {
-    const productCount = await productModel.countDocuments();
-    const orderCount = await orderModel.countDocuments();
-    const pendingOrders = await orderModel.countDocuments({ status: 'Pending' });
-    
-    // Calculate total sales
-    const salesData = await orderModel.aggregate([
-      { $match: { status: { $ne: 'Cancelled' } } },
-      { $group: { _id: null, totalSales: { $sum: '$totalAmount' } } }
+    // Run all independent read queries in parallel
+    const [productCount, orderCount, pendingOrders, salesData, recentOrders] = await Promise.all([
+      productModel.countDocuments(),
+      orderModel.countDocuments(),
+      orderModel.countDocuments({ status: 'Pending' }),
+      orderModel.aggregate([
+        { $match: { status: { $ne: 'Cancelled' } } },
+        { $group: { _id: null, totalSales: { $sum: '$totalAmount' } } }
+      ]),
+      orderModel.find()
+        .sort({ orderDate: -1 })
+        .limit(5)
+        .populate('userId', 'fullname email')
+        .populate('products.product')
     ]);
+
     const totalSales = salesData.length > 0 ? salesData[0].totalSales : 0;
-    
-    // Get recent orders
-    const recentOrders = await orderModel.find()
-      .sort({ orderDate: -1 })
-      .limit(5)
-      .populate('userId', 'fullname email')
-      .populate('products.product');
     
     res.render("admin-dashboard-premium", {
       productCount,

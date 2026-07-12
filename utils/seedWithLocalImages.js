@@ -156,16 +156,29 @@ const productData = [
 ];
 
 /**
- * Seed database with products using local images
- * Always deletes existing products and reseeds with correct data
+ * Seed database with products using local images.
+ * Only seeds when the products collection is empty — safe to call on every
+ * server startup without risk of wiping existing data.
+ * To force a full reseed, pass { force: true }.
  */
-async function seedWithLocalImages() {
+async function seedWithLocalImages({ force = false } = {}) {
   try {
-    console.log('📦 Deleting existing products and reseeding with local images...');
-    
-    // Delete all existing products to ensure clean reseed
-    await productModel.deleteMany({});
-    console.log('✅ Deleted existing products');
+    // Skip seeding if products already exist (unless forced)
+    if (!force) {
+      const existingCount = await productModel.countDocuments();
+      if (existingCount > 0) {
+        console.log(`✅ Products already seeded (${existingCount} found). Skipping seed.`);
+        return false;
+      }
+    }
+
+    console.log('📦 Seeding products with local images...');
+
+    // Only delete when forcing a reseed
+    if (force) {
+      await productModel.deleteMany({});
+      console.log('✅ Deleted existing products (forced reseed)');
+    }
     
     const products = productData.map(data => ({
       name: data.name,

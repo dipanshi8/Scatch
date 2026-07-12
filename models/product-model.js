@@ -120,5 +120,12 @@ productSchema.pre('save', function(next) {
 productSchema.set('toJSON', { virtuals: true });
 productSchema.set('toObject', { virtuals: true });
 
+// Indexes
+// stockQuantity+category: used by every /shop and /new-arrivals query that filters
+//   { stockQuantity: { $gt: 0 } } and optionally { category: X }
+productSchema.index({ stockQuantity: 1, category: 1 });
+// createdAt: used by .sort({ createdAt: -1 }) on every product listing
+productSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model("product", productSchema);
 

@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const isLoggedIn = require("../middlewares/isLoggedIn");
-const ensureAuthenticated = require("../middlewares/ensureAuthenticated"); // Alias for isLoggedIn
 const isAdmin = require("../middlewares/isAdmin");
 const productModel = require("../models/product-model");
 const userModel = require("../models/user-model");
@@ -73,33 +72,35 @@ router.get("/shop", async function (req, res) {
     
     // Only show in-stock products (already in query)
     
-    const products = await productModel.find(query).sort({ createdAt: -1 });
+    // Run product fetch and category counts in parallel — they are independent queries
+    const [products, categoryCounts] = await Promise.all([
+      productModel.find(query).sort({ createdAt: -1 }),
+      productModel.aggregate([
+        { $match: { stockQuantity: { $gt: 0 } } },
+        { $group: { _id: '$category', count: { $sum: 1 } } }
+      ])
+    ]);
     
     // If no products found, try to seed (in case seeding failed on startup)
     if (products.length === 0) {
       const { seedWithLocalImages } = require('../utils/seedWithLocalImages');
       await seedWithLocalImages();
-      // Fetch again after seeding (remove stock filter to show newly seeded products)
-      const updatedProducts = await productModel.find({ category: query.category || undefined }).sort({ createdAt: -1 });
-      // Get category counts
-      const categoryCounts = await productModel.aggregate([
-        { $match: { stockQuantity: { $gt: 0 } } },
-        { $group: { _id: '$category', count: { $sum: 1 } } }
+      // Fetch again after seeding — run both queries in parallel
+      const [updatedProducts, seededCategoryCounts] = await Promise.all([
+        productModel.find({ category: query.category || undefined }).sort({ createdAt: -1 }),
+        productModel.aggregate([
+          { $match: { stockQuantity: { $gt: 0 } } },
+          { $group: { _id: '$category', count: { $sum: 1 } } }
+        ])
       ]);
       return res.render("shop-premium", { 
         products: updatedProducts, 
         category: category || 'all',
         search: search || '',
-        categoryCounts,
+        categoryCounts: seededCategoryCounts,
         pageTitle: 'Shop'
       });
     }
-    
-    // Get category counts for filter display
-    const categoryCounts = await productModel.aggregate([
-      { $match: { stockQuantity: { $gt: 0 } } },
-      { $group: { _id: '$category', count: { $sum: 1 } } }
-    ]);
     
     res.render("shop-premium", { 
       products, 

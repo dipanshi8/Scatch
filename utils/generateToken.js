@@ -7,7 +7,7 @@ const generateToken = (user) => {
     console.warn('⚠️  WARNING: JWT_KEY or JWT_SECRET not set in .env. Using fallback (not secure for production).');
   }
   console.log('🔑 [generateToken] Using JWT secret from:', process.env.JWT_KEY ? 'JWT_KEY' : process.env.JWT_SECRET ? 'JWT_SECRET' : process.env.SESSION_SECRET ? 'SESSION_SECRET' : 'FALLBACK');
-  return jwt.sign({ email: user.email, id: user._id }, jwtSecret);
+  return jwt.sign({ email: user.email, id: user._id }, jwtSecret, { expiresIn: '24h' });
 };
 
 module.exports.generateToken = generateToken;

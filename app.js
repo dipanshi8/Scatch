@@ -55,37 +55,31 @@ app.use(express.static(path.join(__dirname, "public"), { maxAge: '1y', immutable
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
+// Enable EJS template caching in production (avoids recompiling templates on every request)
+if (process.env.NODE_ENV === "production") {
+  app.set("view cache", true);
+}
+
 // 7. Load user from JWT token on every request (non-blocking)
 const loadUser = require("./middlewares/loadUser");
 app.use(loadUser);
 
 // 8. Make user/admin and session data available to all views
-app.use(async (req, res, next) => {
+app.use((req, res, next) => {
   // Pass user to EJS (set by loadUser middleware)
   res.locals.user = req.user || null;
   res.locals.admin = req.admin || null;
   res.locals.error = req.flash("error");
   res.locals.success = req.flash("success");
   res.locals.session = req.session || {};
-  
-  // Calculate cart count for navbar (from database if user is logged in)
-  if (req.user && req.user._id) {
-    try {
-      const userModel = require('./models/user-model');
-      const user = await userModel.findById(req.user._id);
-      if (user && user.cart && Array.isArray(user.cart)) {
-        res.locals.cartCount = user.cart.reduce((total, item) => {
-          return total + (item.quantity || 1);
-        }, 0);
-        res.locals.cartLength = user.cart.length;
-      } else {
-        res.locals.cartCount = 0;
-        res.locals.cartLength = 0;
-      }
-    } catch (err) {
-      res.locals.cartCount = 0;
-      res.locals.cartLength = 0;
-    }
+
+  // Calculate cart count using the user object already loaded by loadUser middleware.
+  // This avoids a second database query on every request.
+  if (req.user && req.user.cart && Array.isArray(req.user.cart)) {
+    res.locals.cartCount = req.user.cart.reduce((total, item) => {
+      return total + (item.quantity || 1);
+    }, 0);
+    res.locals.cartLength = req.user.cart.length;
   } else if (req.session && req.session.cart && Array.isArray(req.session.cart)) {
     // Fallback to session cart for guests
     res.locals.cartCount = req.session.cart.reduce((total, item) => {
@@ -96,10 +90,10 @@ app.use(async (req, res, next) => {
     res.locals.cartCount = 0;
     res.locals.cartLength = 0;
   }
-  
+
   // Make isUserLoggedIn available for navbar
   res.locals.isUserLoggedIn = !!req.user;
-  
+
   next();
 });
 

@@ -5,7 +5,11 @@ const ownerSchema=mongoose.Schema({
         minLength:3,
         trim:true,
     },
-    email:String,
+    email:{
+        type:String,
+        unique:true,  // index: admins are looked up by email on every login
+        sparse:true,  // sparse because email has no required:true
+    },
     password:String,
     products:{
         type:Array,
