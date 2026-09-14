@@ -2,40 +2,40 @@ const jwt = require("jsonwebtoken");
 const userModel = require("../models/user-model");
 
 /**
- * Middleware to load user from JWT token on every request (non-blocking)
- * This allows views to access user data without requiring authentication
+ * Non-blocking middleware that attempts to load the current user from the JWT cookie.
+ * Sets req.user and res.locals.user if successful.
+ * Never blocks a request — on any failure, req.user is set to null and execution continues.
  */
 module.exports = async function (req, res, next) {
-  // This middleware must run AFTER cookieParser
   const token = req.cookies.token;
 
   if (!token) {
-    // No token, continue without user
     req.user = null;
     return next();
   }
 
   try {
-    // Unified JWT Secret: Must match generateToken.js and isLoggedIn.js
     const jwtSecret = process.env.JWT_KEY || process.env.JWT_SECRET || process.env.SESSION_SECRET || 'fallback-jwt-key-not-secure';
     const decoded = jwt.verify(token, jwtSecret);
 
-    const user = await userModel
-      .findOne({ email: decoded.email })
-      .select("-password");
+    const user = await userModel.findByNormalizedEmail(decoded.email, {
+      select: "-password",
+    });
 
     if (user) {
-      req.user = user; // Attach user to request
-      res.locals.user = user; // Make user available in views
+      req.user = user;
+      res.locals.user = user;
     } else {
       req.user = null;
     }
   } catch (err) {
-    // Invalid token, clear it and continue without user
-    console.error("⚠️ [loadUser] JWT verification error:", err.message);
+    // Invalid or expired token — clear it silently
+    if (process.env.NODE_ENV !== 'production') {
+      console.error("[loadUser] JWT error:", err.message);
+    }
     res.clearCookie("token", {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax'
     });
     req.user = null;
@@ -43,4 +43,3 @@ module.exports = async function (req, res, next) {
 
   next();
 };
-

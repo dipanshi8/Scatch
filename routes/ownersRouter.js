@@ -144,7 +144,8 @@ router.post("/admin/products/create", isAdmin, upload.single("image"), async fun
     req.flash("success", "Product created successfully!");
     res.redirect("/owners/admin/products");
   } catch (err) {
-    console.error("Product creation error:", err.message);
+    // Log full error, not just message
+    console.error("Product creation error:", err);
     req.flash("error", "Error creating product: " + err.message);
     res.redirect("/owners/admin/products/create");
   }
@@ -196,8 +197,8 @@ router.post("/admin/products/edit/:id", isAdmin, upload.single("image"), async f
   }
 });
 
-// Delete product
-router.get("/admin/products/delete/:id", isAdmin, async function (req, res) {
+// Delete product — POST to prevent accidental deletion via GET/prefetch
+router.post("/admin/products/delete/:id", isAdmin, async function (req, res) {
   try {
     await productModel.findByIdAndDelete(req.params.id);
     req.flash("success", "Product deleted successfully!");
@@ -214,8 +215,8 @@ router.get("/admin/orders", isAdmin, async function (req, res) {
   try {
     const orders = await orderModel.find()
       .sort({ orderDate: -1 })
-      .populate('user', 'fullname email')
-      .populate('items.product');
+      .populate('userId', 'fullname email')   // userId is the current field
+      .populate('products.product');           // products[] is the current array
     res.render("admin-orders", { orders });
   } catch (err) {
     console.error("Admin orders error:", err);

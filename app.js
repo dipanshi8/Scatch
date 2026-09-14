@@ -39,7 +39,7 @@ app.use(session({
   resave: false, 
   saveUninitialized: false,
   cookie: { 
-    secure: false, 
+    secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   } 
@@ -100,52 +100,54 @@ app.use((req, res, next) => {
 // MongoDB Atlas connection with graceful error handling
 // Uses MONGO_URI environment variable (MongoDB Atlas connection string)
 const mongoURI = process.env.MONGO_URI;
-const dbName = 'Scatchh'; // Database name to use
+const DEFAULT_DB_NAME = 'Scatchh';
 const { seedWithLocalImages } = require('./utils/seedWithLocalImages');
+
+function resolveMongoDatabaseName(uri, fallback) {
+  try {
+    const parsed = new URL(uri);
+    const pathDb = decodeURIComponent(parsed.pathname || '')
+      .replace(/^\/+/, '')
+      .split('/')[0];
+    if (pathDb) return { dbName: pathDb, fromUri: true };
+  } catch (err) {
+    console.error('❌ Could not parse MONGO_URI (value not logged):', err.message);
+  }
+  return { dbName: fallback, fromUri: false };
+}
 
 if (!mongoURI) {
   console.error('❌ MONGO_URI not found in environment variables!');
   console.log('⚠️  App will start in degraded mode without database connection.');
   console.log('💡 Please set MONGO_URI in your .env file.');
 } else {
-  // MongoDB Atlas connection string format: mongodb+srv://user:pass@cluster.mongodb.net/?options
-  // Extract the base URI and append database name before query parameters
-  let connectionString = mongoURI;
-  
-  // Check if database name is already in the URI (between / and ?)
-  const uriMatch = mongoURI.match(/^([^?]+)(\?.*)?$/);
-  if (uriMatch) {
-    const baseUri = uriMatch[1]; // Everything before ?
-    const queryParams = uriMatch[2] || ''; // Everything after ? (including the ?)
-    
-    // Check if baseUri already ends with a database name (has a path after the host)
-    if (!baseUri.match(/\/[^\/]+$/)) {
-      // No database name in path, append it
-      connectionString = `${baseUri}/${dbName}${queryParams}`;
-    } else {
-      // Database name already present, use as-is
-      connectionString = mongoURI;
-    }
+  const { dbName, fromUri } = resolveMongoDatabaseName(mongoURI, DEFAULT_DB_NAME);
+
+  if (!fromUri) {
+    console.warn(`⚠️  MONGO_URI has no /database path. Using explicit dbName "${dbName}".`);
+    console.warn('⚠️  Atlas URIs without a path previously often connected to "test". If shop/users data lives in "test" or "scatchh", put that name in the URI path (e.g. ...mongodb.net/Scatchh?...) so login and signup keep using the same database.');
   }
 
-  // Connect to MongoDB Atlas (non-blocking, won't crash app on failure)
-  mongoose.connect(connectionString, {
-    serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-    socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+  // dbName option is authoritative: signup, login, and shop all share this one database.
+  mongoose.connect(mongoURI, {
+    dbName,
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
   })
     .then(async () => {
       console.log('✅ MongoDB Atlas Connected Successfully!');
-      console.log(`📦 Database: ${dbName}`);
+      console.log(`📦 Database requested: ${dbName}`);
+      console.log(`📦 Database actual: ${mongoose.connection.name}`);
+      console.log('📦 Users collection: users');
       console.log('🌐 Using MongoDB Atlas (cloud)');
-      
-      // Seed products with local images if database is empty
+
       await seedWithLocalImages();
     })
     .catch(err => {
       console.error('❌ MongoDB Atlas Connection Error:', err.message);
       console.log('⚠️  App will continue to run in degraded mode without database.');
       console.log('💡 Database features will not work until connection is established.');
-      console.log('💡 Check your MONGO_URI in .env file and network connectivity.');
+      console.log('💡 Check your MONGO_URI in your environment and network connectivity.');
     });
 }
 

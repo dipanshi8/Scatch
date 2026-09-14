@@ -110,7 +110,7 @@ router.get("/shop", async function (req, res) {
       pageTitle: 'Shop'
     });
   } catch (err) {
-    console.error("Shop loading error:", err.message);
+    console.error("Shop loading error:", err);
     req.flash("error", "Something went wrong while loading the shop.");
     res.redirect("/");
   }
@@ -128,7 +128,7 @@ router.get("/new-arrivals", async function (req, res) {
       pageTitle: 'New Arrivals'
     });
   } catch (err) {
-    console.error("New Arrivals loading error:", err.message);
+    console.error("New Arrivals loading error:", err);
     req.flash("error", "Something went wrong while loading new arrivals.");
     res.redirect("/shop");
   }
@@ -144,7 +144,7 @@ router.get("/product/:id", async function (req, res) {
     }
     res.render("product-detail", { product, pageTitle: product.name });
   } catch (err) {
-    console.error("Product detail error:", err.message);
+    console.error("Product detail error:", err);
     req.flash("error", "Product not found!");
     res.redirect("/shop");
   }
@@ -159,7 +159,7 @@ router.get("/product/:id/quick-view", async function (req, res) {
     }
     res.render("partials/quick-view", { product });
   } catch (err) {
-    console.error("Quick view error:", err.message);
+    console.error("Quick view error:", err);
     res.status(500).send('<div class="alert alert-error">Failed to load product</div>');
   }
 });
@@ -206,8 +206,8 @@ router.get("/checkout", isLoggedIn, async function (req, res) {
       pageTitle: 'Checkout'
     });
   } catch (err) {
-    console.error("Checkout error:", err.message);
-    req.flash("error", "Something went wrong!");
+    console.error("Checkout error:", err);
+    req.flash("error", "Something went wrong loading checkout. Please try again.");
     res.redirect("/cart");
   }
 });
@@ -290,7 +290,7 @@ router.post("/order", isLoggedIn, async function (req, res) {
     req.flash("success", "Order placed successfully!");
     res.redirect(`/order/${order._id}`);
   } catch (err) {
-    console.error("Order placement error:", err.message);
+    console.error("Order placement error:", err);
     req.flash("error", "Failed to place order. Please try again.");
     res.redirect("/checkout");
   }
@@ -303,16 +303,22 @@ router.get("/order/:id", isLoggedIn, async function (req, res) {
       .populate('userId', 'fullname email')
       .populate('products.product');
 
-    // Check if order belongs to user (support both userId and user fields for backward compatibility)
+    // Guard must come BEFORE accessing any order fields
+    if (!order) {
+      req.flash("error", "Order not found!");
+      return res.redirect("/orders");
+    }
+
+    // Support both userId (current) and user (legacy) fields
     const orderUserId = order.userId?._id || order.userId || order.user?._id || order.user;
-    if (!order || !orderUserId || orderUserId.toString() !== req.user._id.toString()) {
+    if (!orderUserId || orderUserId.toString() !== req.user._id.toString()) {
       req.flash("error", "Order not found!");
       return res.redirect("/orders");
     }
 
     res.render("order-detail", { order });
   } catch (err) {
-    console.error("Order detail error:", err.message);
+    console.error("Order detail error:", err);
     req.flash("error", "Order not found!");
     res.redirect("/orders");
   }
@@ -327,8 +333,8 @@ router.get("/orders", isLoggedIn, async function (req, res) {
 
     res.render("orders-premium", { orders, pageTitle: 'My Orders' });
   } catch (err) {
-    console.error("Orders loading error:", err.message);
-    req.flash("error", "Something went wrong!");
+    console.error("Orders loading error:", err);
+    req.flash("error", "Something went wrong loading your orders.");
     res.redirect("/shop");
   }
 });

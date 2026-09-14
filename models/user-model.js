@@ -1,5 +1,14 @@
 const mongoose = require('mongoose');
 
+function normalizeEmail(email) {
+  if (typeof email !== 'string') return '';
+  return email.trim().toLowerCase();
+}
+
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 const userSchema = mongoose.Schema({
   fullname: {
     type: String,
@@ -83,5 +92,25 @@ userSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   next();
 });
+
+userSchema.statics.normalizeEmail = normalizeEmail;
+
+// Exact lowercase match first (uses the unique index), then a case-insensitive
+// fallback so mixed-case emails stored before lowercase:true still resolve.
+userSchema.statics.findByNormalizedEmail = async function (email, options = {}) {
+  const normalized = normalizeEmail(email);
+  if (!normalized) return null;
+
+  const exactQuery = this.findOne({ email: normalized });
+  if (options.select) exactQuery.select(options.select);
+  const exact = await exactQuery;
+  if (exact) return exact;
+
+  const fuzzyQuery = this.findOne({
+    email: { $regex: `^${escapeRegex(normalized)}$`, $options: 'i' }
+  });
+  if (options.select) fuzzyQuery.select(options.select);
+  return fuzzyQuery;
+};
 
 module.exports = mongoose.model("user", userSchema);
